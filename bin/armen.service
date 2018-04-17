@@ -1,0 +1,42 @@
+#!/usr/bin/env perl
+#######
+##   ___ _______ _  ___ ___       _______  _______
+##  / _ `/ __/  ' \/ -_) _ \  _  / __/ _ \/ __/ -_)
+##  \_,_/_/ /_/_/_/\__/_//_/ (_) \__/\___/_/  \__/
+##
+####### Écosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
+
+use Exclus::Exclus;
+use Getopt::Long qw(Configure GetOptions);
+use Module::Runtime qw(use_module);
+
+#md_## Les méthodes
+#md_
+
+#md_### _get_service()
+#md_
+sub _get_service {
+    my $service = 'Satyre';
+    my $attributes = {};
+    my $handler = sub { $attributes->{$_[0]} = $_[1] };
+    Configure(qw(default pass_through no_auto_abbrev no_ignore_case));
+    GetOptions(
+        "service=s" => \$service,
+        "id=s"      => $handler,
+        "port=i"    => $handler
+    );
+    return ucfirst lc $service, $attributes;
+}
+
+#md_### _run_service()
+#md_
+sub _run_service {
+    my ($service, $attributes) = _get_service;
+    return use_module("${service}::Service")->new(%$attributes)->service;
+}
+
+###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
+exit _run_service;
+###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
+
+####### END

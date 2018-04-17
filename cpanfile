@@ -1,0 +1,37 @@
+requires 'perl', '5.010000';
+requires 'namespace::clean';
+requires 'AnyEvent';
+requires 'AnyEvent::HTTP';
+requires 'Authen::SCRAM';
+requires 'Class::XSAccessor';
+requires 'Cpanel::JSON::XS';
+requires 'CryptX';
+requires 'Data::UUID';
+requires 'Data::Visitor::Tiny';
+requires 'Email::Sender';
+requires 'EV';
+requires 'Guard';
+requires 'HTTP::Tiny';                          # v5.13.9
+requires 'IO::Pty';
+requires 'IO::Socket::IP';                      # v5.19.8
+requires 'IO::Socket::SSL';
+requires 'JSON::MaybeXS';
+requires 'Module::Runtime';
+requires 'MongoDB';
+requires 'Moo';
+requires 'Net::OpenSSH';
+requires 'Plack';
+requires 'Plack::Middleware::XForwardedFor';
+requires 'Ref::Util';
+requires 'Ref::Util::XS';
+requires 'Router::Boom';
+requires 'Safe::Isa';
+requires 'String::Random';
+requires 'Sys::Hostname::FQDN';
+requires 'Term::Table';
+requires 'Time::Moment';
+requires 'Try::Tiny';
+requires 'Type::Tiny';
+requires 'Type::Tiny::XS';
+requires 'Twiggy';
+requires 'YAML::XS';
