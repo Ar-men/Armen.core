@@ -36,7 +36,7 @@ sub run {
         push @$rows, [$data->{project}, $data->{version}]
             if exists $data->{project} && exists $data->{version};
     }
-    $self->render_table($rows, 'PROJECT NAME', 'VERSION');
+    $self->render_table($rows, qw(PROJECT VERSION));
 }
 
 1;
