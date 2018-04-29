@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 #######
 ##   ___ _______ _  ___ ___       _______  _______
 ##  / _ `/ __/  ' \/ -_) _ \  _  / __/ _ \/ __/ -_)
@@ -5,27 +6,20 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Satyre::Service;
-
-#md_# Satyre::Service
-#md_
-
 use Exclus::Exclus;
-use Moo;
-use namespace::clean;
-
-extends qw(Obscur::Runner::Service);
-
-#md_## Les attributs
-#md_
-
-###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
-has '+name'        => (default => sub { 'Satyre' });
-has '+description' => (default => sub { 'Le µs chargé de la supervision des autres µs' });
-###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
+use Cursus::Process;
 
 #md_## Les méthodes
 #md_
 
-1;
-__END__
+#md_### _run_process()
+#md_
+sub _run_process {
+    Cursus::Process->new->process;
+}
+
+###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
+exit _run_process;
+###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
+
+####### END

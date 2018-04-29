@@ -3,7 +3,7 @@
 ##  / _ `/ __/  ' \/ -_) _ \  _  / __/ _ \/ __/ -_)
 ##  \_,_/_/ /_/_/_/\__/_//_/ (_) \__/\___/_/  \__/
 ##
-####### Écosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
+####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
 package Obscur::Runner::Process;
 
@@ -40,7 +40,8 @@ sub _configure {
     my ($self) = @_;
     my $config = $self->config;
     # Les valeurs par défaut
-    $config->set_default(debug => 0);
+    $config->set_default(debug  => 0);
+    $config->set_default(stdin  => 'devnull');
     $config->set_default(stderr => '');
     $config->set_default(stdout => '');
     $config->set_default(logger => {use => 'Stdout'});
@@ -80,15 +81,13 @@ sub _set_std {
 #md_
 sub _set_std_streams {
     my ($self) = @_;
-    open(STDIN, '<', devnull)
-        or EX->throw('Impossible de rediriger STDIN'); ##///////////////////////////////////////////////////////////////
+    if ($self->config->get_str('stdin') eq 'devnull') {
+        open(STDIN, '<', devnull)
+            or EX->throw('Impossible de rediriger STDIN'); ##///////////////////////////////////////////////////////////
+    }
     $self->_set_std('stderr', \*STDERR);
     $self->_set_std('stdout', \*STDOUT);
 }
-
-#md_### setup()
-#md_
-sub setup {}
 
 #md_### process()
 #md_
@@ -99,9 +98,8 @@ sub process {
         # Initialisation et configuration minimale
         $self->_initialize;
         $self->_configure;
+        $self->setup if $self->can('setup');
         $self->_set_std_streams;
-        # Mise en place suplémentaire éventuelle
-        $self->setup;
         # Mise en place du 'logger'
         $self->logger->setup($self->config);
         try {

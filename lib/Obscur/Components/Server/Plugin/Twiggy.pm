@@ -3,7 +3,7 @@
 ##  / _ `/ __/  ' \/ -_) _ \  _  / __/ _ \/ __/ -_)
 ##  \_,_/_/ /_/_/_/\__/_//_/ (_) \__/\___/_/  \__/
 ##
-####### Écosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
+####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
 package Obscur::Components::Server::Plugin::Twiggy;
 
@@ -41,13 +41,13 @@ has '_router' => (
 #md_
 sub BUILD {
     my ($self) = @_;
-    my $app = builder {
-        mount '/armen/api' => builder {
-            enable 'Plack::Middleware::XForwardedFor';
-            sub { $self->_psgi_app(@_) };
-        };
-    };
-    Twiggy::Server->new(host => '0.0.0.0', port => $self->runner->port)->register_service($app);
+    my $builder      = Plack::Builder->new;
+    my $builder_api  = Plack::Builder->new;
+    $builder_api->add_middleware('Plack::Middleware::XForwardedFor');
+    $builder->mount('/armen/api' => $builder_api->wrap(sub { $self->_psgi_app(@_) }));
+    $self->build($builder)
+        if $self->can('build');
+    Twiggy::Server->new(host => '0.0.0.0', port => $self->runner->port)->register_service($builder->to_app);
 }
 
 #md_### _route_match()
@@ -261,9 +261,9 @@ sub status { return shift->set_key_value('status', @_) }
 #md_
 sub payload { return shift->set_key_value('payload', @_) }
 
-#md_### render()
+#md_### auto_render()
 #md_
-sub render {
+sub auto_render {
     my ($self) = @_;
     my $response = $self->_response;
     my $content = $self->_content;
@@ -273,8 +273,14 @@ sub render {
     if ($response->content_type =~ m!json!) {
         $body = encode_json($content);
     }
-    else {
+    elsif ($response->content_type =~ m!xml!) {
         $body = hash2xml($content);
+    }
+    else {
+        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
+            message => 'Le contenu de la réponse est de type inconnu',
+            params  => [content_type => $response->content_type]
+        });
     }
     $response->body($body);
     $response->content_length(length($body));
@@ -287,15 +293,27 @@ sub render {
 
 #md_### render_404()
 #md_
-sub render_404 { $_[0]->error('Ressource non trouvée')->status(404)->render }
+sub render_404 { $_[0]->error('Ressource non trouvée')->status(404)->auto_render }
 
 #md_### render_405()
 #md_
-sub render_405 { $_[0]->error('Méthode de requête non autorisée')->status(405)->render }
+sub render_405 { $_[0]->error('Méthode de requête non autorisée')->status(405)->auto_render }
 
 #md_### render_500()
 #md_
-sub render_500 { shift->error(@_)->status(500)->render }
+sub render_500 { shift->error(@_)->status(500)->auto_render }
+
+#md_### render()
+#md_
+sub render {
+    my ($self, $content_type, $content, $status) = @_;
+    my $response = $self->_response;
+    $response->content_type($content_type);
+    $response->body($content);
+    $response->content_length(length($content));
+    $response->status($status // 200);
+    return $self;
+}
 
 #md_### finalize()
 #md_

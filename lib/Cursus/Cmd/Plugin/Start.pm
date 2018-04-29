@@ -5,34 +5,37 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Exclus::Config::Plugin::File;
+package Cursus::Cmd::Plugin::Start;
 
-#md_# Exclus::Config::Plugin::File
+#md_# Cursus::Cmd::Plugin::Start
 #md_
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(Str);
-use YAML::XS qw(LoadFile);
 use namespace::clean;
 
-extends qw(Exclus::Config::Plugin);
-
-#md_## Les attributs
-#md_
-
-#md_### file_name
-#md_
-has 'file_name' => (
-    is => 'ro', isa => Str, required => 1
-);
+extends qw(Cursus::Cmd::Plugin);
 
 #md_## Les méthodes
 #md_
 
-#md_### load()
+#md_### run()
 #md_
-sub load { return LoadFile($_[0]->file_name) }
+sub run {
+    my ($self) = @_;
+}
 
 1;
 __END__
+
+=encoding utf8
+
+=head1 Commande:
+
+    armen start [µs.name ...]
+
+=head1 Description:
+
+    Lancer de nouvelles instances de µs
+
+=cut

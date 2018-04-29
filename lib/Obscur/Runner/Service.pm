@@ -3,7 +3,7 @@
 ##  / _ `/ __/  ' \/ -_) _ \  _  / __/ _ \/ __/ -_)
 ##  \_,_/_/ /_/_/_/\__/_//_/ (_) \__/\___/_/  \__/
 ##
-####### Écosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
+####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
 package Obscur::Runner::Service;
 
@@ -153,14 +153,13 @@ sub _get_status {
         dc          => $self->dc_name,
         node        => $self->node_name
     });
-    $respond->($rr->render->finalize);
+    $respond->($rr->auto_render->finalize);
 }
 
 #md_### _API()
 #md_
 sub _API {
     my ($self) = @_;
-    $self->server->get(   '/status', sub { $self->_get_status(@_) });
     $self->server->get('/v0/status', sub { $self->_get_status(@_) });
 }
 

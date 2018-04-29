@@ -1,5 +1,5 @@
 # armen.core
-Écosystème basé sur les microservices
+Ecosystème basé sur les microservices
 
 ## Blocus
 Le µs "gatekeeper"

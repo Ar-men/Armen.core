@@ -20,6 +20,8 @@ requires 'Module::Runtime';
 requires 'MongoDB';
 requires 'Moo';
 requires 'Net::OpenSSH';
+requires 'Path::Iterator::Rule';
+requires 'Path::Tiny';
 requires 'Plack';
 requires 'Plack::Middleware::XForwardedFor';
 requires 'Ref::Util';

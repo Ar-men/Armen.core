@@ -3,7 +3,7 @@
 ##  / _ `/ __/  ' \/ -_) _ \  _  / __/ _ \/ __/ -_)
 ##  \_,_/_/ /_/_/_/\__/_//_/ (_) \__/\___/_/  \__/
 ##
-####### Écosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
+####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
 package Exclus::Data;
 
