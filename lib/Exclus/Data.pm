@@ -11,8 +11,9 @@ package Exclus::Data;
 #md_
 
 use Exclus::Exclus;
+use List::Util qw(shuffle);
 use Moo;
-use Ref::Util qw(is_hashref);
+use Ref::Util qw(is_coderef is_hashref);
 use Types::Standard qw(ArrayRef Bool HashRef Int Maybe Str);
 use Exclus::Exceptions;
 use Exclus::Util qw(deep_exists monkey_patch);
@@ -85,7 +86,27 @@ sub create {
     return $data ? $self->new(data => $data) : undef;
 }
 
-#md_### get_(?:arrayref|bool|hashref|int|str)()
+#md_### foreach_key()
+#md_
+sub foreach_key {
+    my $self = shift;
+    my $opts = is_hashref($_[0]) ? shift : {};
+    $opts->{create} //= 0;
+    my $cb = shift;
+    my $data = $self->data;
+    my @keys = keys %$data;
+    $cb->($_, $opts->{create} ? $self->new(data => $data->{$_}) : $data->{$_}, @_)
+        foreach
+            exists $opts->{sort}
+                ? $opts->{sort}
+                    ? is_coderef($opts->{sort})
+                        ? sort {$opts->{sort}->($data->{$a}, $data->{$b})} values @keys
+                        : sort @keys
+                    : shuffle @keys
+                : @keys;
+}
+
+#md_### get_(arrayref|bool|hashref|int|str)()
 #md_
 foreach my $type (ArrayRef, Bool, HashRef, Int, Str) {
     monkey_patch(
