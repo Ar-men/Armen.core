@@ -20,6 +20,25 @@ extends qw(Obscur::Context);
 #md_## Les méthodes
 #md_
 
+#md_### clear_terminal()
+#md_
+sub clear_terminal {
+    print "\e[2J";
+    print "\e[0;0H";
+}
+
+#md_### clear_to_end()
+#md_
+sub clear_to_end { print "\e[J" }
+
+#md_### store_position()
+#md_
+sub store_position { print "\e7"  }
+
+#md_### restore_position()
+#md_
+sub restore_position { print "\e8"  }
+
 #md_### render_table()
 #md_
 sub render_table {

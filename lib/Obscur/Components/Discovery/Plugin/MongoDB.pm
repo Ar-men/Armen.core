@@ -111,5 +111,14 @@ sub update_service_heartbeat {
     $self->_discovery->update_one({_id => $service->id}, {'$set' => {heartbeat => time}});
 }
 
+#md_### get_services()
+#md_
+sub get_services {
+    my ($self) = @_;
+    my @services = $self->_discovery->find->all;
+    $_->{id} = delete $_->{_id} foreach @services;
+    return @services;
+}
+
 1;
 __END__
