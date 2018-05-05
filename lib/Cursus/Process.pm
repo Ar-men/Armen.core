@@ -60,7 +60,6 @@ sub run {
     my $cmd = shift @ARGV // 'help';
     if ($cmd eq 'help') { $self->_help(@ARGV) }
     else {
-        say '';
         try {
             plugin('Cursus::Cmd', ucfirst($cmd), {runner => $self})->run(@ARGV);
         }
@@ -68,7 +67,6 @@ sub run {
             to_stderr($_);
             die $_;
         };
-        say '';
     }
 }
 

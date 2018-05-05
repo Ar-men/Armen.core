@@ -36,4 +36,5 @@ requires 'Try::Tiny';
 requires 'Type::Tiny';
 requires 'Type::Tiny::XS';
 requires 'Twiggy';
+requires 'XML::Hash::XS';
 requires 'YAML::XS';
