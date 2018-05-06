@@ -117,7 +117,7 @@ sub _load {
 #md_
 sub setup {
     my ($self, @options) = @_;
-    $self->set('config', delete $ENV{ARMEN_CONFIG}) if exists $ENV{ARMEN_CONFIG};
+    $self->set('config', $ENV{ARMEN_CONFIG}) if exists $ENV{ARMEN_CONFIG};
     $self->_configure_options;
     $self->_get_options('config=s@');
     my $count = 0;
@@ -129,6 +129,7 @@ sub setup {
     }
     foreach (keys %ENV) {
         next unless m!^ARMEN_(.+)$!;
+        next if $1 eq 'CONFIG';
         $self->set(lc $1, $ENV{$_});
     }
     $self->_get_options(@options);
