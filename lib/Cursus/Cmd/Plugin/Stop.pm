@@ -22,7 +22,33 @@ extends qw(Cursus::Cmd::Plugin);
 #md_### run()
 #md_
 sub run {
-    my ($self) = @_;
+    my ($self, @args) = @_;
+    my @services = $self->runner->discovery->get_services;
+    if (@services) {
+        unless (@args) {
+            push @args, $_->{id} foreach @services;
+        }
+        say 'Arrêt des µs:';
+        foreach my $arg (@args) {
+            foreach (@services) {
+                my $service_name = $_->{name};
+                my $pid = $_->{pid};
+                if (($arg eq $_->{id} || ucfirst(lc($arg)) eq $service_name) && $pid ne '#') {
+                    say "---> ${service_name}[$_->{id}]";
+                    my $node_name = $_->{node};
+                    if ($node_name eq $self->runner->node_name) {
+                        kill 'TERM', $_->{pid};
+                    }
+                    else {
+                        #TODO
+                    }
+                }
+            }
+        }
+    }
+    else {
+        say "Aucun µs n'est enregistré.";
+    }
 }
 
 1;
