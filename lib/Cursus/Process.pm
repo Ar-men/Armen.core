@@ -25,7 +25,7 @@ extends qw(Obscur::Runner::Process);
 
 ###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
 has '+name'        => (default => sub { 'Cursus' });
-has '+description' => (default => sub { "Client version ligne de commande" });
+has '+description' => (default => sub { "Le client version ligne de commande" });
 ###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
 
 #md_## Les méthodes
