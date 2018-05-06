@@ -22,7 +22,26 @@ extends qw(Cursus::Cmd::Plugin);
 #md_### run()
 #md_
 sub run {
-    my ($self) = @_;
+    my ($self, @args) = @_;
+    my $services = $self->config->create({default => {}}, 'services');
+    if ($services->count_keys) {
+        push @args, 'Satyre' unless @args;
+        say "Lancement des µs\n", '=' x 16;
+        foreach (@args) {
+            my $service = ucfirst(lc($_));
+            say "---> $service";
+            if ($services->exists($service)) {
+                system("armen.service --service=$service &");
+            }
+            else {
+                say "Ce µs n'existe pas.";
+            }
+        }
+        say '';
+    }
+    else {
+        say "Aucun µs n'a été déclaré.";
+    }
 }
 
 1;
