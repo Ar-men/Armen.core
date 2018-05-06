@@ -26,7 +26,7 @@ sub run {
     my $services = $self->config->create({default => {}}, 'services');
     if ($services->count_keys) {
         push @args, 'Satyre' unless @args;
-        say "Lancement des µs\n", '=' x 16;
+        say 'Lancement des µs:';
         foreach (@args) {
             my $service = ucfirst(lc($_));
             say "---> $service";
@@ -37,7 +37,6 @@ sub run {
                 say "Ce µs n'existe pas.";
             }
         }
-        say '';
     }
     else {
         say "Aucun µs n'a été déclaré.";
