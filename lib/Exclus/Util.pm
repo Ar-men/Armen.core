@@ -14,15 +14,17 @@ use Exclus::Exclus;
 use Data::Dumper ();
 use Data::UUID ();
 use Exporter qw(import);
-use List::Util qw(min);
+use List::Util qw(min max);
 use Module::Runtime qw(use_module);
 use POSIX qw(strftime);
 use Ref::Util qw(is_ref is_hashref);
+use Scalar::Util qw(looks_like_number);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 
 our @EXPORT_OK = qw(
     trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef
     dump_data  monkey_patch  key_value  plugin  deep_exists  ms_sleep t0 t0_ms_elapsed
+    to_priority
 );
 
 #md_## Les méthodes
@@ -148,6 +150,23 @@ sub t0_ms_elapsed { tv_interval($_[0]) * 1000 }
 #md_Millisecondes
 #md_
 sub ms_sleep { usleep($_[0] * 1000) }
+
+#md_### to_priority()
+#md_
+sub to_priority {
+    state $_priorities = {
+        NONE     => 0,
+        LOW      => 20,
+        MEDIUM   => 50,
+        HIGH     => 80,
+        CRITICAL => 100
+    };
+    my ($priority) = @_;
+    return min(max($priority, 0), 100)
+        if looks_like_number($priority);
+    return
+        exists $_priorities->{$priority} ? $_priorities->{$priority} : 0;
+}
 
 1;
 __END__
