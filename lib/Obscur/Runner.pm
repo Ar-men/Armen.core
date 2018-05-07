@@ -146,7 +146,7 @@ sub build_resource {
     my ($self, $type, $cfg) = @_;
     my $resource_name;
     my $resources = $self->_resources;
-    if ($cfg->count_keys == 1 && $cfg->exists('resource')) {
+    if ($cfg->exists('resource')) {
         $resource_name = $cfg->get_str('resource');
         return $resources->{$resource_name} if exists $resources->{$resource_name};
         $cfg = $self->config->create('resources', $resource_name);
