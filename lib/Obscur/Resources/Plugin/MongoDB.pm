@@ -42,7 +42,6 @@ sub _get_auth {
     my $password = $auth->maybe_get_str('password');
     $options->{password} = try_decrypt($password)
         if defined $password;
-
     return $options
 }
 
