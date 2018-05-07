@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use List::Util qw(shuffle);
 use Moo;
 use Ref::Util qw(is_coderef is_hashref);
-use Types::Standard qw(ArrayRef Bool HashRef Int Maybe Str);
+use Types::Standard qw(ArrayRef Bool HashRef Int Maybe Num Str);
 use Exclus::Exceptions;
 use Exclus::Util qw(deep_exists monkey_patch);
 use namespace::clean;
@@ -106,9 +106,9 @@ sub foreach_key {
                 : @keys;
 }
 
-#md_### get_(arrayref|bool|hashref|int|str)()
+#md_### get_(arrayref|bool|hashref|int|num|str)()
 #md_
-foreach my $type (ArrayRef, Bool, HashRef, Int, Str) {
+foreach my $type (ArrayRef, Bool, HashRef, Int, Num, Str) {
     monkey_patch(
         __PACKAGE__,
         'get_' . lc($type),
@@ -131,6 +131,10 @@ foreach my $type (ArrayRef, Bool, HashRef, Int, Str) {
         }
     );
 }
+
+#md_### maybe_get_any()
+#md_
+sub maybe_get_any { shift->get({type => Maybe[ArrayRef|Bool|HashRef|Int|Num|Str], default => undef}, @_) }
 
 1;
 __END__
