@@ -82,7 +82,7 @@ sub _delayed_response {
 sub _psgi_app {
     my ($self, $env) = @_;
     my $runner = $self->runner;
-    my $rr = _RequestResponse->new(runner => $runner, env => $env);
+    my $rr = _RequestResponse->new(runner => $runner, env => $env, debug => $self->debug);
     my $later;
     try {
         my $continue = $runner->can('on_request') ? $runner->on_request($rr) : 1;
@@ -189,11 +189,7 @@ has '_content' => (
 #md_### _debug
 #md_
 has '_debug' => (
-    is => 'ro',
-    isa => Bool,
-    lazy => 1,
-    default => sub { $_[0]->runner->config->get_bool({default => 0}, 'debug_server') },
-    init_arg => undef
+    is => 'ro', isa => Bool, required => 1, init_arg => 'debug'
 );
 
 #md_## Les méthodes

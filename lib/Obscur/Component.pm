@@ -12,9 +12,23 @@ package Obscur::Component;
 
 use Exclus::Exclus;
 use Moo;
+use Types::Standard qw(Bool);
 use namespace::clean;
 
 extends qw(Obscur::Object);
+
+#md_## Les attributs
+#md_
+
+#md_### debug
+#md_
+has 'debug' => (
+    is => 'ro',
+    isa => Bool,
+    lazy => 1,
+    default => sub { $_[0]->cfg->get_bool({default => 0}, 'debug') },
+    init_arg => undef
+);
 
 1;
 __END__
