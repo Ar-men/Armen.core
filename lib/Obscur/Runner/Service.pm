@@ -123,12 +123,12 @@ sub _register {
     my $port = $self->port;
     {
         my $unlock = $self->sync->lock_w_unlock('services', 5000); ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-            $port = $self->discovery->register_service(
-                $self,
-                $self->config->get_int('port_min'),
-                $self->config->get_int('port_max'),
-                $port
-            );
+        $port = $self->discovery->register_service(
+            $self,
+            $self->config->get_int('port_min'),
+            $self->config->get_int('port_max'),
+            $port
+        );
     }
     $self->info('Registered', [port => $port]);
     $self->port($port);
