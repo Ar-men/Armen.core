@@ -65,6 +65,21 @@ has 'reserved' => (
 #md_## Les méthodes
 #md_
 
+#md_### from_json()
+#md_
+sub from_json {
+    my ($class, $data) = @_;
+    return $class->new(%{JSON::MaybeXS->new(utf8 => 1)->decode($data)});
+}
+
+#md_### from_mongodb()
+#md_
+sub from_mongodb {
+    my ($class, $data) = @_;
+    $data->{id} = delete $data->{_id};
+    return $class->new(%$data);
+}
+
 #md_### _render()
 #md_
 sub _render {
@@ -79,10 +94,6 @@ sub _render {
         reserved  => $self->reserved
     };
 }
-
-#md_### to_data()
-#md_
-sub to_data { $_[0]->_render }
 
 #md_### to_json()
 #md_

@@ -11,9 +11,12 @@ package Obscur::Components::Broker::Plugin::MongoDB;
 #md_
 
 use Exclus::Exclus;
+use AnyEvent;
 use Moo;
+use Try::Tiny;
 use Types::Standard qw(ArrayRef HashRef InstanceOf Str);
 use Exclus::Data;
+use Exclus::Exceptions;
 use Exclus::Message;
 use namespace::clean;
 
@@ -82,12 +85,101 @@ sub publish {
         my $collection = $bindings->{$queue}->{collection};
         foreach (@{$bindings->{$queue}->{bindings}}) {
             if ($type =~ m!^$_$!) {
-                $collection->insert_one($message->to_mongodb);
                 $self->logger->debug('Publish', ['@id' => $message->id, queue => $queue, type => $type])
                     if $self->debug;
+                $collection->insert_one($message->to_mongodb);
                 last;
             }
         }
+    }
+}
+
+#md_### try_publish()
+#md_
+sub try_publish {
+    my ($self, @args) = @_;
+    try   { $self->publish(@args) }
+    catch { $self->logger->error("$_") };
+}
+
+#md_### _ack_message()
+#md_
+sub _ack_message {
+    my ($self, $collection, $message) = @_;
+    try   { $collection->delete_one({_id => $message->id}) }
+    catch { $self->logger->error("$_") };
+}
+
+#md_### _requeue_message()
+#md_
+sub _requeue_message {
+    my ($self, $collection, $message) = @_;
+    try   { $collection->update_one({_id => $message->id}, {'$set' => {reserved => 0, timestamp => time + 30}}) }
+    catch { $self->logger->error("$_") };
+}
+
+#md_### _get_message()
+#md_
+sub _get_message {
+    my ($self, $after, $collection, $cb_name) = @_;
+    return
+        if $self->runner->is_stopping;
+    my $w;
+    $w = AE::timer(
+        $after,
+        0,
+        sub {
+            undef $w;
+            try {
+                my $doc = $collection->find_one_and_update(
+                    {reserved => 0, timestamp => {'$lt' => time}},
+                    {'$set' => {reserved => 1, timestamp => time}},
+                    {sort => {priority => -1, timestamp => 1}}
+                );
+                if ($doc) {
+                    try {
+                        my $message = Exclus::Message->from_mongodb($doc);
+                        $self->logger->debug('Consume', ['@id' => $message->id, type => $message->type])
+                            if $self->debug;
+                        try {
+                            $self->runner->$cb_name($message->type, $message);
+                            $self->_ack_message($collection, $message);
+                        }
+                        catch {
+                            $self->logger->error("$_");
+                            $self->_requeue_message($collection, $message);
+                        };
+                    }
+                    catch {
+                        $self->logger->error("$_");
+                    };
+                    $after = 0.1;
+                }
+                else {
+                    $after = 1;
+                }
+            }
+            catch {
+                $self->logger->error("$_");
+                $after = 10;
+            };
+            $self->_get_message($after, $collection, $cb_name);
+        }
+    );
+}
+
+#md_### consume()
+#md_
+sub consume {
+    my ($self, $queue, $cb_name) = @_;
+    if (my $collection = $self->_bindings->{$queue}->{collection}) {
+        $self->_get_message(1, $collection, $cb_name // 'on_message');
+    }
+    else {
+        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
+            message => "Cette queue n'existe pas",
+            params  => [queue => $queue]
+        })
     }
 }
 
