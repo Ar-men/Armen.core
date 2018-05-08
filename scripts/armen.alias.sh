@@ -9,9 +9,11 @@
 alias aav='armen available'
 alias ade='armen decrypt'
 alias aen='armen encrypt'
-alias ato='armen stop'
-alias are='armen registered'
-alias ata='armen start'
 alias aex='armen execute'
+alias ahe='armen help'
+alias are='armen registered'
+alias ato='armen stop'
+alias ata='armen start'
+alias ave='armen version'
 
 ####### END
