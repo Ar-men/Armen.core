@@ -17,6 +17,7 @@ use Safe::Isa qw($_isa);
 use Sys::Hostname::FQDN qw(fqdn);
 use Types::Standard qw(HashRef InstanceOf Str);
 use Exclus::Config;
+use Exclus::Data;
 use Exclus::Exceptions;
 use Exclus::Logger;
 use Exclus::Util qw(create_uuid monkey_patch plugin);
@@ -158,7 +159,7 @@ sub build_resource {
             params  => [plugin => $plugin_name]
         });
     }
-    my $resource = $plugin->build_resource;
+    my $resource = $plugin->build_resource($self, $resource_name);
     $resources->{$resource_name} = $resource
         if $resource_name;
     return $resource;

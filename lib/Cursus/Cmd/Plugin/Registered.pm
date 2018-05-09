@@ -28,24 +28,24 @@ sub _sort {
     $a->{name} cmp $b->{name} || $a->{dc} cmp $b->{dc} || $a->{node} cmp $b->{node} || $a->{port} <=> $b->{port};
 }
 
-#md_### _get_elapsed_time()
+#md_### _get_uptime()
 #md_
-sub _get_elapsed_time {
+sub _get_uptime {
     my ($class, $time) = @_;
-    my $elapsed = time - $time;
-    if ($elapsed >= 86400) {
-        $elapsed = int($elapsed/86400);
-        return sprintf("%3u (d)", $elapsed);
+    my $uptime = time - $time;
+    if ($uptime >= 86400) {
+        $uptime = int($uptime/86400);
+        return sprintf("%3u (d)", $uptime);
     }
-    if ($elapsed >= 3600) {
-        $elapsed = int($elapsed/3600);
-        return sprintf("%3u (h)", $elapsed);
+    if ($uptime >= 3600) {
+        $uptime = int($uptime/3600);
+        return sprintf("%3u (h)", $uptime);
     }
-    if ($elapsed >= 60) {
-        $elapsed = int($elapsed/60);
-        return sprintf("%3u (m)", $elapsed);
+    if ($uptime >= 60) {
+        $uptime = int($uptime/60);
+        return sprintf("%3u (m)", $uptime);
     }
-    return sprintf("%3u (s)", $elapsed);
+    return sprintf("%3u (s)", $uptime);
 }
 
 #md_### _registered()
@@ -57,11 +57,11 @@ sub _registered {
         my $rows = [];
         foreach (sort _sort @services) {
             my $row = [$_->{id}, $_->{name}, $_->{status}, $_->{dc}, $_->{node}, $_->{pid}, $_->{port}];
-            push @$row, $self->_get_elapsed_time($_->{timestamp});
+            push @$row, $self->_get_uptime($_->{timestamp});
             push @$row, sprintf('%5u (s)', time - $_->{heartbeat});
             push @$rows, $row;
         }
-        $self->render_table($rows, qw(ID NAME STATUS DC NODE PID PORT ELAPSED HEARTBEAT));
+        $self->render_table($rows, qw(ID NAME STATUS DC NODE PID PORT UPTIME HEARTBEAT));
     }
     else {
         say "Aucun µs n'est enregistré.";

@@ -48,7 +48,7 @@ sub _get_auth {
 #md_### build_resource()
 #md_
 sub build_resource {
-    my ($self) = @_;
+    my ($self, $runner, $name) = @_;
     return Exclus::Databases::MongoDB->new(
         host    => 'mongodb://' . join(',', @{$self->cfg->get_arrayref('servers')}),
         options => $self->_get_auth($self->_get_options)

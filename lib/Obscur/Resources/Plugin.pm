@@ -29,7 +29,7 @@ has 'cfg' => (
 
 #md_### build_resource()
 #md_
-sub build_resource {}
+sub build_resource {...}
 
 1;
 __END__

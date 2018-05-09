@@ -33,7 +33,7 @@ has 'data' => (
 
 #md_### count_keys()
 #md_
-sub count_keys { return scalar keys %{$_[0]->data} }
+sub count_keys { scalar keys %{$_[0]->data} }
 
 #md_### exists()
 #md_
