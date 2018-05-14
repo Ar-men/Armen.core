@@ -44,15 +44,15 @@ sub BUILD {
     my $builder      = Plack::Builder->new;
     my $builder_api  = Plack::Builder->new;
     $builder_api->add_middleware('Plack::Middleware::XForwardedFor');
-    $builder->mount('/armen/api' => $builder_api->wrap(sub { $self->_psgi_app(@_) }));
+    $builder->mount('/armen/api' => $builder_api->wrap(sub { $self->_psgi_armen_api(@_) }));
     $self->build($builder)
         if $self->can('build');
     Twiggy::Server->new(host => '0.0.0.0', port => $self->runner->port)->register_service($builder->to_app);
 }
 
-#md_### _route_match()
+#md_### route_match()
 #md_
-sub _route_match {
+sub route_match {
     my ($self, $env) = @_;
     my ($cb, $params, $method_not_allowed) = $self->_router->match($env->{REQUEST_METHOD}, $env->{PATH_INFO});
     return unless $cb;
@@ -77,9 +77,9 @@ sub _delayed_response {
     };
 }
 
-#md_### _psgi_app()
+#md_### _psgi_armen_api()
 #md_
-sub _psgi_app {
+sub _psgi_armen_api {
     my ($self, $env) = @_;
     my $runner = $self->runner;
     my $rr = _RequestResponse->new(runner => $runner, env => $env, debug => $self->debug);
@@ -87,7 +87,7 @@ sub _psgi_app {
     try {
         my $continue = $runner->can('on_request') ? $runner->on_request($rr) : 1;
         if ($continue) {
-            if (my $match = $self->_route_match($env)) {
+            if (my $match = $self->route_match($env)) {
                 $later = $self->_delayed_response($rr, @$match);
             }
             elsif (defined $match) {
@@ -307,7 +307,8 @@ sub render {
     $response->content_type($content_type);
     $response->body($content);
     $response->content_length(length($content));
-    $response->status($status // 200);
+    $response->status($status)
+        if $status;
     return $self;
 }
 
