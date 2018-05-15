@@ -52,13 +52,7 @@ sub BUILD {
 
 #md_### route_match()
 #md_
-sub route_match {
-    my ($self, $env) = @_;
-    my ($cb, $params, $method_not_allowed) = $self->_router->match($env->{REQUEST_METHOD}, $env->{PATH_INFO});
-    return unless $cb;
-    return 0 if $method_not_allowed;
-    return [$cb, $params];
-}
+sub route_match {return shift->_router->match($_[0]->{REQUEST_METHOD}, $_[0]->{PATH_INFO}) }
 
 #md_### _delayed_response()
 #md_
@@ -87,10 +81,11 @@ sub _psgi_armen_api {
     try {
         my $continue = $runner->can('on_request') ? $runner->on_request($rr) : 1;
         if ($continue) {
-            if (my $match = $self->route_match($env)) {
-                $later = $self->_delayed_response($rr, @$match);
+            my ($cb, $params, $is_method_not_allowed, $allowed_methods) = $self->route_match($env);
+            if ($cb) {
+                $later = $self->_delayed_response($rr, $cb, $params);
             }
-            elsif (defined $match) {
+            elsif ($is_method_not_allowed || $allowed_methods) {
                 $rr->render_405;
             }
             else {
@@ -99,8 +94,9 @@ sub _psgi_armen_api {
         }
     }
     catch {
-        $self->logger->error("$_");
-        $rr->render_500("$_");
+        my $error = "$_";
+        $self->logger->error($error);
+        $rr->render_500(     $error);
     };
     return $later ? $later : $rr->finalize;
 }
