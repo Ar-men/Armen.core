@@ -3,6 +3,7 @@ requires 'namespace::clean';
 requires 'AnyEvent';
 requires 'AnyEvent::HTTP';
 requires 'Authen::SCRAM';
+requires 'BSON::XS';
 requires 'Class::XSAccessor';
 requires 'Cpanel::JSON::XS';
 requires 'CryptX';
