@@ -27,5 +27,12 @@ has '+description' => (default => sub { 'Le µs chargé de la supervision des au
 #md_## Les méthodes
 #md_
 
+#md_### on_starting()
+#md_
+sub on_starting {
+    my ($self) = @_;
+$self->get_resource('SSH', 'ingest');
+}
+
 1;
 __END__
