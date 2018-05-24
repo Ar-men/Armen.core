@@ -18,3 +18,6 @@ La librairie commune aux µs
 
 ## Satyre
 Le µs chargé de la supervision des autres µs
+
+## Woofer
+Le µs chargé de diffuser les messages vers l'extérieur
