@@ -18,6 +18,7 @@ use Moo;
 use Try::Tiny;
 use Types::Standard qw(Bool InstanceOf Int Str);
 use Exclus::Exceptions;
+use Exclus::Util qw($_call_if_can);
 use namespace::clean;
 
 extends qw(Obscur::Runner::Process);
@@ -153,7 +154,7 @@ sub _get_status {
         dc          => $self->dc_name,
         node        => $self->node_name
     });
-    $respond->($rr->auto_render->finalize);
+    $respond->($rr->render->finalize);
 }
 
 #md_### _API()
@@ -194,8 +195,7 @@ sub _stop {
     try   { $self->discovery->update_service_status($self, 'stopping') }
     catch { $self->error("$_") };
     $self->scheduler->remove;
-    $self->on_stopping
-        if $self->can('on_stopping');
+    $self->$_call_if_can('on_stopping');
     $self->scheduler->add_timer(5, 2, sub { $self->_stop_loop if $self->is_ready_to_stop });
 }
 
@@ -225,8 +225,7 @@ sub run {
     scope_guard { $self->_deregister };
     $self->_API;
     $self->_update;
-    $self->on_starting
-        if $self->can('on_starting');
+    $self->$_call_if_can('on_starting');
     $self->info('READY.service', [description => $self->description]);
     $self->_start_loop;
 }

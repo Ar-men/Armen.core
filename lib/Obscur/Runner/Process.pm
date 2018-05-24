@@ -16,7 +16,7 @@ use Guard qw(guard);
 use Moo;
 use Try::Tiny;
 use Exclus::Exceptions;
-use Exclus::Util qw(to_stderr);
+use Exclus::Util qw($_call_if_can to_stderr);
 use namespace::clean;
 
 extends qw(Obscur::Runner);
@@ -45,7 +45,7 @@ sub _configure {
     $config->set_default(stderr => '');
     $config->set_default(stdout => '');
     $config->set_default(logger => {use => 'Stdout'});
-    $self->set_config_default if $self->can('set_config_default');
+    $self->$_call_if_can('set_config_default');
     my @options = $self->can('add_config_options') ? $self->add_config_options : ();
     $config->setup(
         'debug!',
@@ -98,14 +98,14 @@ sub process {
         # Initialisation et configuration minimale
         $self->_initialize;
         $self->_configure;
-        $self->setup if $self->can('setup');
+        $self->$_call_if_can('setup');
         $self->_set_std_streams;
         # Mise en place du 'logger'
         $self->logger->setup($self->config);
         try {
             $self->info('BEGIN.process', [id => $self->id, name => $self->name, pid => $$]);
             # C'est un 'runner' donc...
-            $self->run if $self->can('run');
+            $self->$_call_if_can('run');
             $exit = 0;
         }
         catch {

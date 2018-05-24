@@ -17,6 +17,7 @@ use Router::Boom::Method;
 use Try::Tiny;
 use Twiggy::Server;
 use Types::Standard qw(InstanceOf);
+use Exclus::Util qw($_call_if_can);
 use namespace::clean;
 
 extends qw(Obscur::Component);
@@ -43,11 +44,13 @@ sub BUILD {
     my ($self) = @_;
     my $builder      = Plack::Builder->new;
     my $builder_api  = Plack::Builder->new;
+    $builder_api->add_middleware('Plack::Middleware::ContentLength');
     $builder_api->add_middleware('Plack::Middleware::XForwardedFor');
-    $builder->mount('/armen/api' => $builder_api->wrap(sub { $self->_psgi_armen_api(@_) }));
-    $self->build($builder)
-        if $self->can('build');
-    Twiggy::Server->new(host => '0.0.0.0', port => $self->runner->port)->register_service($builder->to_app);
+    $builder->mount('/armen/api' => $builder_api->wrap(sub { $self->_psgi_api(@_) }));
+    $self->$_call_if_can(build => $builder);
+    my $runner = $self->runner;
+    $runner->$_call_if_can(build_psgi => $builder);
+    Twiggy::Server->new(host => '0.0.0.0', port => $runner->port)->register_service($builder->to_app);
 }
 
 #md_### route_match()
@@ -71,26 +74,23 @@ sub _delayed_response {
     };
 }
 
-#md_### _psgi_armen_api()
+#md_### _psgi_api()
 #md_
-sub _psgi_armen_api {
-    my ($self, $env) = @_;
+sub _psgi_api {
+    my ($self, $on_request, $env) = @_;
     my $runner = $self->runner;
     my $rr = _RequestResponse->new(runner => $runner, env => $env, debug => $self->debug);
     my $later;
     try {
-        my $continue = $runner->can('on_request') ? $runner->on_request($rr) : 1;
-        if ($continue) {
-            my ($cb, $params, $is_method_not_allowed, $allowed_methods) = $self->route_match($env);
-            if ($cb) {
-                $later = $self->_delayed_response($rr, $cb, $params);
-            }
-            elsif ($is_method_not_allowed || $allowed_methods) {
-                $rr->render_405;
-            }
-            else {
-                $rr->render_404;
-            }
+        my ($cb, $params, $is_method_not_allowed, $allowed_methods) = $self->route_match($env);
+        if ($cb) {
+            $later = $self->_delayed_response($rr, $cb, $params);
+        }
+        elsif ($is_method_not_allowed || $allowed_methods) {
+            $rr->render_405;
+        }
+        else {
+            $rr->render_404;
         }
     }
     catch {
@@ -253,20 +253,18 @@ sub status { return shift->set_key_value('status', @_) }
 #md_
 sub payload { return shift->set_key_value('payload', @_) }
 
-#md_### auto_render()
+#md_### render()
 #md_
-sub auto_render {
+sub render {
     my ($self) = @_;
     my $response = $self->_response;
     my $content = $self->_content;
     $response->status(delete $content->{status});
-
-    my $body;
     if ($response->content_type =~ m!json!) {
-        $body = encode_json($content);
+        $response->body(encode_json($content));
     }
     elsif ($response->content_type =~ m!xml!) {
-        $body = hash2xml($content);
+        $response->body(hash2xml($content));
     }
     else {
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,39 +272,22 @@ sub auto_render {
             params  => [content_type => $response->content_type]
         });
     }
-    $response->body($body);
-    $response->content_length(length($body));
-
     $self->logger->debug('Response', ['@id' => $self->id, status => $response->status, content => $content])
         if $self->_debug;
-
     return $self;
 }
 
 #md_### render_404()
 #md_
-sub render_404 { $_[0]->error('Ressource non trouvée')->status(404)->auto_render }
+sub render_404 { $_[0]->error('Ressource non trouvée')->status(404)->render }
 
 #md_### render_405()
 #md_
-sub render_405 { $_[0]->error('Méthode de requête non autorisée')->status(405)->auto_render }
+sub render_405 { $_[0]->error('Méthode de requête non autorisée')->status(405)->render }
 
 #md_### render_500()
 #md_
-sub render_500 { shift->error(@_)->status(500)->auto_render }
-
-#md_### render()
-#md_
-sub render {
-    my ($self, $content_type, $content, $status) = @_;
-    my $response = $self->_response;
-    $response->content_type($content_type);
-    $response->body($content);
-    $response->content_length(length($content));
-    $response->status($status)
-        if $status;
-    return $self;
-}
+sub render_500 { shift->error(@_)->status(500)->render }
 
 #md_### finalize()
 #md_
