@@ -77,7 +77,7 @@ sub _delayed_response {
 #md_### _psgi_api()
 #md_
 sub _psgi_api {
-    my ($self, $on_request, $env) = @_;
+    my ($self, $env) = @_;
     my $runner = $self->runner;
     my $rr = _RequestResponse->new(runner => $runner, env => $env, debug => $self->debug);
     my $later;
@@ -167,7 +167,7 @@ has '_response' => (
     isa => InstanceOf['Plack::Response'],
     lazy => 1,
     default => sub {
-        Plack::Response->new(200, {'Content-Type' => 'application/json; charset=UTF-8', 'Content-Length' => 0})
+        Plack::Response->new(200, {'Content-Type' => 'application/json; charset=UTF-8'})
     },
     init_arg => undef
 );

@@ -33,13 +33,10 @@ sub _sort {
 sub _get_uptime {
     my ($class, $time) = @_;
     my $uptime = time - $time;
-    return sprintf("%3d (d)", int($uptime/86400))
-        if $uptime >= 86400;
-    return sprintf("%3d (h)", int($uptime/3600))
-        if $uptime >= 3600;
-    return sprintf("%3d (m)", int($uptime/60))
-        if $uptime >= 60;
-    return sprintf("%3d (s)", $uptime);
+    return sprintf('%dd', int($uptime/86400)) if $uptime >= 86400;
+    return sprintf('%dh', int($uptime/ 3600)) if $uptime >=  3600;
+    return sprintf('%dm', int($uptime/   60)) if $uptime >=    60;
+    return sprintf('%ds',     $uptime);
 }
 
 #md_### _registered()
@@ -57,7 +54,7 @@ sub _registered {
                 $_->{dc},
                 $_->{node},
                 $_->{port},
-                sprintf('%5d (s)', time - $_->{heartbeat}),
+                sprintf('%ds', time - $_->{heartbeat}),
                 $self->_get_uptime($_->{timestamp}),
                 $_->{pid}
             ];
