@@ -27,7 +27,7 @@ extends qw(Obscur::Resources::Plugin);
 #md_
 sub build_resource {
     my ($self, $runner, $name) = @_;
-    $name //= "no_name";
+    $name //= 'no_name';
     my $cfg = $self->cfg;
     if ($cfg->exists('cluster')) {
         my $nodes = {};
