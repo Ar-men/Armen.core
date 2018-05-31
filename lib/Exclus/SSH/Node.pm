@@ -12,10 +12,12 @@ package Exclus::SSH::Node;
 
 use Exclus::Exclus;
 use Moo;
+use Net::OpenSSH;
 use Ref::Util qw(is_hashref);
 use Types::Standard qw(Bool HashRef Int Str);
 use Exclus::Crypt qw(try_decrypt);
 use Exclus::Exceptions;
+use Exclus::SSH::Connection;
 use namespace::clean;
 
 extends qw(Exclus::SSH::Base);
@@ -115,9 +117,17 @@ sub connect {
     else {
         $options{passphrase} = try_decrypt($data->{passphrase})
             if exists $data->{passphrase};
-        $options{key_path} = $data->{key}
-            if exists $data->{key};
+        $options{key_path} = $data->{key_file}
+            if exists $data->{key_file};
     }
+    my $ssh = Net::OpenSSH->new($self->server, %options);
+    if ($ssh->error) {
+        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
+            message => 'Impossible de se connecter à ce noeud SSH',
+            params  => [node => $self->name, server => $self->server, username => $username, error => $ssh->error]
+        });
+    }
+    return Exclus::SSH::Connection->new(logger => $logger, ssh => $ssh);
 }
 
 1;

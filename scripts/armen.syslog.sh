@@ -6,7 +6,14 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-tail -n 500 -f /var/log/armen/armen.log | mawk -Wi '
+if [ $# -eq 0 ]
+then
+    log_file_name='/var/log/armen/armen.log'
+else
+    log_file_name=$1
+fi
+
+tail -n 500 -f $log_file_name | mawk -Wi '
   /{INF}/ {print $0}
   /{DEB}/ {print "\033[36m" $0 "\033[39m"}
   /{NOT}/ {print "\033[32m" $0 "\033[39m"}

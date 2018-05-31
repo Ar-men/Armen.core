@@ -31,7 +31,8 @@ has '+description' => (default => sub { 'Le µs chargé de la supervision des au
 #md_
 sub on_starting {
     my ($self) = @_;
-$self->get_resource('SSH', 'ingest');
+my $ssh = $self->get_resource('SSH', 'ingest-0')->connect('ubuntu', $self->logger);
+$ssh->system('uptime');
 }
 
 1;
