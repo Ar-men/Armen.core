@@ -39,12 +39,12 @@ sub build_resource {
                 });
             }
             my $resource = $runner->get_resource('SSH', $_);
-            if ($resource->is_cluster) {
-                EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////
-                    message => "Ce cluster SSH ne peut utiliser un autre cluster",
-                    params  => [cluster => $name]
-                });
-            }
+##          if ($resource->is_cluster) {
+##              EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////
+##                  message => "Ce cluster SSH ne peut utiliser un autre cluster",
+##                  params  => [cluster => $name]
+##              });
+##          }
             $nodes->{$_} = $resource;
         }
         return Exclus::SSH::Cluster->new(name => $name, nodes => $nodes);

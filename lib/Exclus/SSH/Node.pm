@@ -14,7 +14,8 @@ use Exclus::Exclus;
 use Moo;
 use Net::OpenSSH;
 use Ref::Util qw(is_hashref);
-use Types::Standard qw(Bool HashRef Int Str);
+use Try::Tiny;
+use Types::Standard qw(HashRef Int Str);
 use Exclus::Crypt qw(try_decrypt);
 use Exclus::Exceptions;
 use Exclus::SSH::Connection;
@@ -66,7 +67,7 @@ sub BUILD {
         unless (is_hashref($data)) {
             $data = defined $data ? {password => $data} : {};
         }
-        $data->{_usable}    = 1;
+        $data->{_failure}   = 0;
         $data->{_timestamp} = 0;
     }
 }
@@ -78,25 +79,7 @@ sub is_node { 1 }
 #md_### _get_username()
 #md_
 sub _get_username {
-    my ($self) = @_;
-    my @users = keys %{$self->users};
-    if (@users > 1) {
-        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
-            message => "Plusieurs utilisateurs sont disponibles pour ce noeud SSH",
-            params  => [node => $self->name]
-        });
-    }
-    return $users[0];
-}
-
-#md_### connect()
-#md_
-sub connect {
-    my $self = shift;
-    my $opts = is_hashref($_[0]) ? shift : {};
-    my ($username, $logger) = @_;
-    my %options = (%{$self->options}, %$opts);
-    $options{port} = $self->port;
+    my ($self, $username) = @_;
     my $users = $self->users;
     if (defined $username) {
         unless (exists $users->{$username}) {
@@ -107,10 +90,25 @@ sub connect {
         }
     }
     else {
-        $username = $self->_get_username;
+        my @users = keys %$users;
+        if (@users > 1) {
+            EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
+                message => "Plusieurs utilisateurs sont disponibles pour ce noeud SSH",
+                params  => [node => $self->name]
+            });
+        }
+        $username = $users[0];
     }
+    return ($username, $users->{$username});
+}
+
+#md_### _connect()
+#md_
+sub _connect {
+    my ($self, $logger, $opts, $username, $data) = @_;
+    my %options = (%{$self->options}, %{$opts || {}});
+    $options{port} = $self->port;
     $options{user} = $username;
-    my $data = $users->{$username};
     if (exists $data->{password}) {
         $options{password} = try_decrypt($data->{password});
     }
@@ -122,12 +120,34 @@ sub connect {
     }
     my $ssh = Net::OpenSSH->new($self->server, %options);
     if ($ssh->error) {
+        $data->{_failure}  += 1;
+        $data->{_timestamp} = time;
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
             message => 'Impossible de se connecter à ce noeud SSH',
             params  => [node => $self->name, server => $self->server, username => $username, error => $ssh->error]
         });
     }
+    $data->{_failure} = 0;
     return Exclus::SSH::Connection->new(logger => $logger, ssh => $ssh);
+}
+
+#md_### connect()
+#md_
+sub connect {
+    my ($self, $logger, $user, $opts) = @_;
+    return $self->_connect($logger, $opts, $self->_get_username($user));
+}
+
+#md_### try_connect()
+#md_
+sub try_connect {
+    my ($self, $logger, $user, $opts) = @_;
+    my ($username, $data) = $self->_get_username($user);
+    return if $data->{_failure} && time - $data->{_timestamp} <= $data->{_failure} * 60;
+    my $connection;
+    try   { $connection = $self->_connect($logger, $opts, $username, $data) }
+    catch { $logger->warning("$_") };
+    return $connection;
 }
 
 1;

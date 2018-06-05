@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use Moo;
 use Net::OpenSSH::Constants qw(:error);
 use Ref::Util qw(is_hashref);
-use Types::Standard qw(InstanceOf Maybe Str);
+use Types::Standard qw(InstanceOf);
 use Exclus::Exceptions;
 use namespace::clean;
 
@@ -24,7 +24,7 @@ use namespace::clean;
 #md_### logger
 #md_
 has 'logger' => (
-    is => 'ro', isa => Maybe[InstanceOf['Exclus::Logger']], required => 1
+    is => 'ro', isa => InstanceOf['Exclus::Logger'], required => 1
 );
 
 #md_### ssh
@@ -35,6 +35,13 @@ has 'ssh' => (
 
 #md_## Les méthodes
 #md_
+
+#md_### get_details()
+#md_
+sub get_details {
+    my ($self) = @_;
+    return ($self->ssh->get_host, $self->ssh->get_user);
+}
 
 #md_### _sudo()
 #md_
@@ -50,36 +57,22 @@ sub _sudo {
 #md_
 sub _debug {
     my ($self, $cmd) = @_;
-    if ($self->logger) {
-        my $ssh = $self->ssh;
-        $self->logger->debug(
-            'SSH',
-            [server => $ssh->get_host, username => $ssh->get_user, cmd => $cmd]
-        );
-    }
+    my $ssh = $self->ssh;
+    $self->logger->debug('SSH', [server => $ssh->get_host, username => $ssh->get_user, cmd => $cmd] );
 }
 
 #md_### _throw_error()
 #md_
 sub _throw_error {
     my ($self, $cmd, $stderr) = @_;
-    my ($field, $value);
     my $ssh = $self->ssh;
-    if ($stderr) {
-        $field = 'stderr';
-        $value = $stderr;
-    }
-    else {
-        $field = 'error';
-        $value = $ssh->error;
-    }
     EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////////
         message => 'SSH',
         params  => [
             cmd      => $cmd,
             server   => $ssh->get_host,
             username => $ssh->get_user,
-            $field   => $value
+            $stderr ? (stderr => $stderr) : (error => $ssh->error)
         ]
     });
 }
@@ -128,6 +121,35 @@ sub execute {
         $self->_throw_error($cmd);
     }
     return $stdout;
+}
+
+#md_### DESTROY()
+#md_
+sub DESTROY {}
+
+#md_### AUTOLOAD()
+#md_
+sub AUTOLOAD {
+    my $self = shift;
+    my $opts = is_hashref($_[0]) ? shift : {};
+    our $AUTOLOAD;
+    my $cmd = $AUTOLOAD;
+    $cmd =~ s/.*:://;
+    return $self->execute($opts, $cmd, @_);
+}
+
+#md_### compute_md5()
+#md_
+sub compute_md5 {
+    my $self = shift;
+    my $output = $self->md5sum(@_);
+    if ($output =~ m!^([a-f0-9]{32})\s!) {
+        return $1;
+    }
+    EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////////
+        message => 'Cette valeur ne correspond pas à un md5',
+        params  => [output => $output]
+    });
 }
 
 1;
