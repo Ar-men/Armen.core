@@ -12,6 +12,7 @@ package Obscur::Components::Scheduler::Plugin::AnyEvent;
 
 use Exclus::Exclus;
 use AnyEvent;
+use AnyEvent::Timer::Cron;
 use Moo;
 use Try::Tiny;
 use Types::Standard qw(HashRef);
@@ -58,7 +59,11 @@ sub add_timer {
 #md_
 sub add_cron {
     my ($self, $cron, $cb, $name) = @_;
-    #TODO
+    $self->_events->{$name} = AnyEvent::Timer::Cron->new(
+        cron => $cron,
+        cb => $cb,
+        time_zone => DateTime::TimeZone::Local->TimeZone()
+    );
 }
 
 #md_### remove()
