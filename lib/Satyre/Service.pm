@@ -27,15 +27,19 @@ has '+description' => (default => sub { 'Le µs chargé de la supervision des au
 #md_## Les méthodes
 #md_
 
+#md_### _supervise()
+#md_
+sub _supervise {
+    my ($self) = @_;
+    $self->info('>>>> Supervise');
+    $self->info('<<<< Supervise');
+}
+
 #md_### on_starting()
 #md_
 sub on_starting {
     my ($self) = @_;
-foreach (1..100) {
-my $ssh = $self->get_resource('SSH', 'ingest')->connect($self->logger, 'ubuntu');
-say $ssh->compute_md5('./.profile');
-sleep 1;
-}
+    $self->scheduler->add_timer(0, $self->cfg->get_int({default => 30}, 'frequency'), sub { $self->_supervise });
 }
 
 1;
