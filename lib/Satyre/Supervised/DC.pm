@@ -5,16 +5,16 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Satyre::Supervised::Service;
+package Satyre::Supervised::DC;
 
-#md_# Satyre::Supervised::Service
+#md_# Satyre::Supervised::DC
 #md_
 
 use Exclus::Exclus;
 use List::Util qw(shuffle);
 use Moo;
-use Types::Standard qw(HashRef InstanceOf Int Maybe);
-use Satyre::Supervised::DC;
+use Types::Standard qw(HashRef InstanceOf);
+use Satyre::Supervised::Node;
 use namespace::clean;
 
 extends qw(Satyre::Supervised::Base);
@@ -25,19 +25,13 @@ extends qw(Satyre::Supervised::Base);
 #md_### deploy_max
 #md_
 has '+deploy_max' => (
-    default => sub { $_[0]->deploy->maybe_get_int('overall') },
+    default => sub { $_[0]->deploy->maybe_get_int('dc') }
 );
 
-#md_### port
+#md_### _nodes
 #md_
-has 'port' => (
-    is => 'ro', isa => Maybe[Int], required => 1
-);
-
-#md_### _dcs
-#md_
-has '_dcs' => (
-    is => 'lazy', isa => HashRef[InstanceOf['Satyre::Supervised::DC']], init_arg => undef
+has '_nodes' => (
+    is => 'lazy', isa => HashRef[InstanceOf['Satyre::Supervised::Node']], init_arg => undef
 );
 
 #md_## Les méthodes
@@ -48,35 +42,36 @@ has '_dcs' => (
 sub BUILD {
     my ($self) = @_;
     $self->deploy_max;
-    $self->_dcs;
+    $self->_nodes;
 }
 
-#md_### _build__dcs()
+#md_### _build__nodes()
 #md_
-sub _build__dcs {
+sub _build__nodes {
     my ($self) = @_;
-    my $dcs = {};
-    $self->config->create({default => {}}, 'dcs')->foreach_key(
+    my $nodes = {};
+    $self->config->create({default => {}}, 'nodes')->foreach_key(
         {create => 1},
         sub {
-            my ($name, $dc) = @_;
+            my ($name, $node) = @_;
             return
-                if $dc->get_bool({default => 0}, 'disabled');
-            $dcs->{$name} = Satyre::Supervised::DC->new(
+                if $node->get_str('dc') ne $self->name
+                || $node->get_bool({default => 0}, 'disabled');
+            $nodes->{$name} = Satyre::Supervised::Node->new(
                 runner => $self->runner,
                 name   => $name,
                 deploy => $self->deploy
             );
         }
     );
-    return $dcs;
+    return $nodes;
 }
 
 #md_### reset()
 #md_
 sub reset {
     my ($self) = @_;
-    $_->reset foreach values %{$self->_dcs};
+    $_->reset foreach values %{$self->_nodes};
     $self->count(0);
 }
 
@@ -84,18 +79,18 @@ sub reset {
 #md_
 sub update {
     my ($self, $service) = @_;
-    $self->_dcs->{$service->{dc}}->update($service) if exists $self->_dcs->{$service->{dc}};
+    $self->_nodes->{$service->{node}}->update if exists $self->_nodes->{$service->{node}};
     $self->count($self->count + 1);
 }
 
 #md_### launch()
 #md_
 sub launch {
-    my ($self) = @_;
+    my $self = shift;
     return
         if $self->deploy_max
         && $self->count >= $self->deploy_max;
-    $_->launch($self) foreach shuffle values %{$self->_dcs};
+    $_->launch(@_, $self) foreach shuffle values %{$self->_nodes};
 }
 
 1;

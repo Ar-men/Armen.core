@@ -11,7 +11,9 @@ package Satyre::Service;
 #md_
 
 use Exclus::Exclus;
+use List::Util qw(shuffle);
 use Moo;
+use Try::Tiny;
 use Types::Standard qw(HashRef InstanceOf);
 use Satyre::Supervised::Service;
 use namespace::clean;
@@ -44,15 +46,37 @@ sub _build__services {
         {create => 1},
         sub {
             my ($name, $service) = @_;
+            return
+                if $service->get_bool({default => 0}, 'disabled');
             $services->{$name} = Satyre::Supervised::Service->new(
-                disabled => $service->get_bool({default => 0}, 'disabled'),
-                port     => $service->maybe_get_int('port'),
-                deploy   => $service->create('deploy')
+                runner => $self,
+                name   => $name,
+                port   => $service->maybe_get_int('port'),
+                deploy => $service->create('deploy')
             );
         }
     );
     return $services;
 }
+
+#md_### _reset()
+#md_
+sub _reset { $_->reset foreach values %{$_[0]->_services} }
+
+#md_### _update()
+#md_
+sub __update {
+    my $self = shift;
+    my $services = $self->_services;
+    foreach (@_) {
+        next if $_->{status} eq 'stopping';
+        $services->{$_->{name}}->update($_) if exists $services->{$_->{name}};
+    }
+}
+
+#md_### _launch()
+#md_
+sub _launch { $_->launch foreach shuffle values %{$_[0]->_services} }
 
 #md_### _supervise()
 #md_
@@ -61,7 +85,15 @@ sub _supervise {
     my $unlock = $self->sync->lock_w_unlock('supervise', 5000); ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     return if $self->is_stopping;
     $self->info('>>>> Supervise');
-$self->_services;
+    try {
+        $self->_reset;
+        my @services = $self->discovery->get_services;
+        $self->_update(@services);
+        $self->_launch;
+    }
+    catch {
+        $self->error("$_");
+    };
     $self->info('<<<< Supervise');
 }
 
@@ -69,6 +101,7 @@ $self->_services;
 #md_
 sub on_starting {
     my ($self) = @_;
+    $self->_services;
     $self->scheduler->add_timer(0, $self->cfg->get_int({default => 30}, 'frequency'), sub { $self->_supervise });
 }
 
