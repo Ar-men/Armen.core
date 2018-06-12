@@ -12,7 +12,7 @@ package Obscur::Resources::Plugin::MongoDB;
 
 use Exclus::Exclus;
 use Moo;
-use Exclus::Crypt qw(try_decrypt);
+use Exclus::Crypt qw(decrypt);
 use Exclus::Databases::MongoDB;
 use namespace::clean;
 
@@ -40,7 +40,7 @@ sub _get_auth {
     $options->{username} = $username
         if defined $username;
     my $password = $auth->maybe_get_str('password');
-    $options->{password} = try_decrypt($password)
+    $options->{password} = decrypt($password)
         if defined $password;
     return $options
 }

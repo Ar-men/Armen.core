@@ -15,7 +15,7 @@ use MongoDB;
 use Moo;
 use Ref::Util qw(is_hashref);
 use Types::Standard qw(HashRef InstanceOf Maybe Str);
-use Exclus::Crypt qw(try_decrypt);
+use Exclus::Crypt qw(decrypt);
 use namespace::clean;
 
 #md_## Les attributs
@@ -53,7 +53,7 @@ has '_client' => (
 sub _build__client {
     my $self = shift;
     my $codec = MongoDB::BSON->new(dt_type => 'Time::Moment');
-    return MongoDB::MongoClient->new(host => try_decrypt($self->uri), app_name => 'armen', bson_codec => $codec)
+    return MongoDB::MongoClient->new(host => decrypt($self->uri), app_name => 'armen', bson_codec => $codec)
         if $self->uri;
     return MongoDB::MongoClient->new(
         host       => $self->host,

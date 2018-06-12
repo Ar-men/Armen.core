@@ -16,7 +16,7 @@ use Net::OpenSSH;
 use Ref::Util qw(is_hashref);
 use Try::Tiny;
 use Types::Standard qw(HashRef Int Str);
-use Exclus::Crypt qw(try_decrypt);
+use Exclus::Crypt qw(decrypt);
 use Exclus::Exceptions;
 use Exclus::SSH::Connection;
 use namespace::clean;
@@ -110,10 +110,10 @@ sub _connect {
     $options{port} = $self->port;
     $options{user} = $username;
     if (exists $data->{password}) {
-        $options{password} = try_decrypt($data->{password});
+        $options{password} = decrypt($data->{password});
     }
     else {
-        $options{passphrase} = try_decrypt($data->{passphrase})
+        $options{passphrase} = decrypt($data->{passphrase})
             if exists $data->{passphrase};
         $options{key_path} = $data->{key_file}
             if exists $data->{key_file};
