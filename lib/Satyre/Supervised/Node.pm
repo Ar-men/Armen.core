@@ -16,31 +16,25 @@ use namespace::clean;
 
 extends qw(Satyre::Supervised::Base);
 
-#md_## Les attributs
-#md_
-
-#md_### deploy_max
-#md_
-has '+deploy_max' => (
-    default => sub { $_[0]->deploy->maybe_get_int('node') }
-);
-
 #md_## Les méthodes
 #md_
 
 #md_### BUILD()
 #md_
-sub BUILD { $_[0]->deploy_max }
+sub BUILD {
+    my ($self, $attributes) = @_;
+    $self->_deploy($attributes->{deploy}->maybe_get_int('node'));
+}
 
 #md_### reset()
 #md_
-sub reset { $_[0]->count(0) }
+sub reset { $_[0]->_count(0) }
 
 #md_### reset()
 #md_
 sub update {
     my ($self) = @_;
-    $self->count($self->count + 1);
+    $self->_count($self->_count + 1);
 }
 
 #md_### _launch_service()
@@ -55,8 +49,8 @@ sub _launch_service {
 sub launch {
     my $self = shift;
     return
-        if $self->deploy_max
-        && $self->count >= $self->deploy_max;
+        if $self->_deploy
+        && $self->_count >= $self->_deploy;
     $self->_launch_service(@_);
 }
 

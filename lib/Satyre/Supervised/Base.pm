@@ -12,7 +12,7 @@ package Satyre::Supervised::Base;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(InstanceOf Int Str Maybe);
+use Types::Standard qw(Int Str Maybe);
 use namespace::clean;
 
 extends qw(Obscur::Context);
@@ -26,21 +26,15 @@ has 'name' => (
     is => 'ro', isa => Str, required => 1
 );
 
-#md_### deploy
+#md_### _deploy
 #md_
-has 'deploy' => (
-    is => 'ro', isa => InstanceOf['Exclus::Data'], required => 1
+has '_deploy' => (
+    is => 'rw', isa => Maybe[Int], default => sub { undef }, init_arg => undef
 );
 
-#md_### deploy_max
+#md_### _count
 #md_
-has 'deploy_max' => (
-    is => 'ro', isa => Maybe[Int], lazy => 1, init_arg => undef
-);
-
-#md_### count
-#md_
-has 'count' => (
+has '_count' => (
     is => 'rw', isa => Int, default => sub { 0 }, init_arg => undef
 );
 

@@ -22,34 +22,20 @@ extends qw(Satyre::Supervised::Base);
 #md_## Les attributs
 #md_
 
-#md_### deploy_max
-#md_
-has '+deploy_max' => (
-    default => sub { $_[0]->deploy->maybe_get_int('dc') }
-);
-
 #md_### _nodes
 #md_
 has '_nodes' => (
-    is => 'lazy', isa => HashRef[InstanceOf['Satyre::Supervised::Node']], init_arg => undef
+    is => 'ro', isa => HashRef[InstanceOf['Satyre::Supervised::Node']], default => sub { {} }, init_arg => undef
 );
 
 #md_## Les méthodes
 #md_
 
-#md_### BUILD()
-#md_
-sub BUILD {
-    my ($self) = @_;
-    $self->deploy_max;
-    $self->_nodes;
-}
-
 #md_### _build__nodes()
 #md_
 sub _build__nodes {
-    my ($self) = @_;
-    my $nodes = {};
+    my ($self, $deploy) = @_;
+    my $nodes = $self->_nodes;
     $self->config->create({default => {}}, 'nodes')->foreach_key(
         {create => 1},
         sub {
@@ -60,11 +46,19 @@ sub _build__nodes {
             $nodes->{$name} = Satyre::Supervised::Node->new(
                 runner => $self->runner,
                 name   => $name,
-                deploy => $self->deploy
+                deploy => $deploy
             );
         }
     );
-    return $nodes;
+}
+
+#md_### BUILD()
+#md_
+sub BUILD {
+    my ($self, $attributes) = @_;
+    my $deploy = $attributes->{deploy};
+    $self->_deploy($deploy->maybe_get_int('dc'));
+    $self->_build__nodes($deploy);
 }
 
 #md_### reset()
@@ -72,7 +66,7 @@ sub _build__nodes {
 sub reset {
     my ($self) = @_;
     $_->reset foreach values %{$self->_nodes};
-    $self->count(0);
+    $self->_count(0);
 }
 
 #md_### update()
@@ -80,7 +74,7 @@ sub reset {
 sub update {
     my ($self, $service) = @_;
     $self->_nodes->{$service->{node}}->update if exists $self->_nodes->{$service->{node}};
-    $self->count($self->count + 1);
+    $self->_count($self->_count + 1);
 }
 
 #md_### launch()
@@ -88,8 +82,8 @@ sub update {
 sub launch {
     my $self = shift;
     return
-        if $self->deploy_max
-        && $self->count >= $self->deploy_max;
+        if $self->_deploy
+        && $self->_count >= $self->_deploy;
     $_->launch(@_, $self) foreach shuffle values %{$self->_nodes};
 }
 
