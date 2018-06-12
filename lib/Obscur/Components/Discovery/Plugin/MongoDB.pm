@@ -47,6 +47,46 @@ has '_discovery' => (
 #md_## Les méthodes
 #md_
 
+#md_### pre_register_service()
+#md_
+sub pre_register_service {
+    my ($self, $id, $name, $node, $dc, $port_min, $port_max, $fixed_port) = @_;
+    my $port = $fixed_port;
+    my $registered = 0;
+    while (!$registered) {
+        $port = int(rand($port_max - $port_min + 1) + $port_min) unless $port;
+        try {
+            $self->_discovery->insert_one({
+                _id       => $id,
+                name      => $name,
+                node      => $node,
+                dc        => $dc,
+                port      => $port,
+                pid       => '#',
+                status    => 'launched',
+                timestamp => time,
+                heartbeat => time
+            });
+            $registered = 1;
+        }
+        catch {
+            if ($_->$_isa('MongoDB::DuplicateKeyError')) {
+                if ($fixed_port) {
+                    EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////
+                        message => "Le port suivant est déjà utilisé",
+                        params  => [port => $port]
+                    });
+                }
+                $port = undef;
+            }
+            else {
+                die $_;
+            }
+        };
+    }
+    return $port;
+}
+
 #md_### register_service()
 #md_
 sub register_service {

@@ -70,16 +70,17 @@ sub BUILD {
 #md_
 sub reset {
     my ($self) = @_;
-    $_->reset foreach values %{$self->_dcs};
     $self->_count(0);
+    $_->reset foreach values %{$self->_dcs};
 }
 
 #md_### update()
 #md_
 sub update {
     my ($self, $service) = @_;
-    $self->_dcs->{$service->{dc}}->update($service) if exists $self->_dcs->{$service->{dc}};
     $self->_count($self->_count + 1);
+    my $dcs = $self->_dcs;
+    $dcs->{$service->{dc}}->update($service) if exists $dcs->{$service->{dc}};
 }
 
 #md_### launch()

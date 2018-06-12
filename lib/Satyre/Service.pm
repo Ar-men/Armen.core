@@ -59,13 +59,13 @@ sub _build__services {
     return $services;
 }
 
-#md_### _reset()
+#md_### _reset_counters()
 #md_
-sub _reset { $_->reset foreach values %{$_[0]->_services} }
+sub _reset_counters { $_->reset foreach values %{$_[0]->_services} }
 
-#md_### _update()
+#md_### _update_counters()
 #md_
-sub __update {
+sub _update_counters {
     my $self = shift;
     my $services = $self->_services;
     foreach (@_) {
@@ -74,9 +74,9 @@ sub __update {
     }
 }
 
-#md_### _launch()
+#md_### _launch_services()
 #md_
-sub _launch { $_->launch foreach shuffle values %{$_[0]->_services} }
+sub _launch_services { $_->launch foreach shuffle values %{$_[0]->_services} }
 
 #md_### _supervise()
 #md_
@@ -86,10 +86,10 @@ sub _supervise {
     return if $self->is_stopping;
     $self->info('>>>> Supervise');
     try {
-        $self->_reset;
+        $self->_reset_counters;
         my @services = $self->discovery->get_services;
-        $self->_update(@services);
-        $self->_launch;
+        $self->_update_counters(@services);
+        $self->_launch_services;
     }
     catch {
         $self->error("$_");
