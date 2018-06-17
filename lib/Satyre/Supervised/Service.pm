@@ -87,9 +87,6 @@ sub update {
 #md_
 sub launch {
     my ($self) = @_;
-    return
-        if $self->_deploy
-        && $self->_count >= $self->_deploy;
     $_->launch($self) foreach shuffle values %{$self->_dcs};
 }
 

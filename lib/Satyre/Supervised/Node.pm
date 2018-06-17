@@ -11,28 +11,12 @@ package Satyre::Supervised::Node;
 #md_
 
 use Exclus::Exclus;
-use constant DELAY => 120;
 use Moo;
-use Types::Standard qw(Int Maybe Str);
+use Try::Tiny;
 use Exclus::Util qw(create_uuid);
 use namespace::clean;
 
 extends qw(Satyre::Supervised::Base);
-
-#md_## Les attributs
-#md_
-
-#md_### _last_id
-#md_
-has '_last_id' => (
-    is => 'rw', isa => Maybe[Str], default => sub { undef }, init_arg => undef
-);
-
-#md_### _last_timestamp
-#md_
-has '_last_timestamp' => (
-    is => 'rw', isa => Int, default => sub { 0 }, init_arg => undef
-);
 
 #md_## Les méthodes
 #md_
@@ -51,30 +35,15 @@ sub reset { $_[0]->_count(0) }
 #md_### update()
 #md_
 sub update {
-    my ($self, $service) = @_;
+    my ($self) = @_;
     $self->_count($self->_count + 1);
-    $self->_last_id(undef)
-        if $self->_last_id && $service->{status} eq 'running' && $self->_last_id eq $service->{id};
 }
 
 #md_### _launch_service()
 #md_
 sub _launch_service {
-    my ($self, $service, $dc) = @_;
+    my ($self, $dc, $service) = @_;
     my $service_name = $service->name;
-    if ($self->_last_id && time - $self->_last_timestamp < DELAY) {
-        my $wait = DELAY + $self->_last_timestamp - time;
-        $self->logger->notice(
-            "Ce service ne peut être relancé pour l'instant",
-            [
-                service => $service_name,
-                dc      => $dc->name,
-                node    => $self->name,
-                wait    => "${wait}s"
-            ]
-        );
-        return;
-    }
     my $id = create_uuid;
     my $port = $self->runner->discovery->pre_register_service(
         $id,
@@ -88,24 +57,40 @@ sub _launch_service {
     $self->logger->info(
         'Launch', [id => $id, service => $service_name, dc => $dc->name, node => $self->name, port => $port]
     );
+    my $result;
     if ($self->name eq $self->runner->node_name) {
         system("armen.service --service=$service_name --id=$id --port=$port &");
+        $result = 1;
     }
     else {
-#TODO
+        my $ssh = $self->runner->get_resource('SSH', $self->name)->try_connect($self->logger);
+        if ($ssh) {
+            try {
+                $ssh->execute('./armen.service.sh', "--service=$service_name", "--id=$id", "--port=$port");
+                $result = 1;
+            }
+            catch {
+                $self->logger->error("$_");
+            };
+        }
     }
-    $self->_last_id($id);
-    $self->_last_timestamp(time);
+    return $result;
 }
 
 #md_### launch()
 #md_
 sub launch {
-    my $self = shift;
-    return
-        if $self->_deploy
-        && $self->_count >= $self->_deploy;
-    $self->_launch_service(@_);
+    my ($self, $dc, $service) = @_;
+    for (;;) {
+        last
+            if (defined $service->_deploy && $service->_count >= $service->_deploy)
+            || (defined      $dc->_deploy &&      $dc->_count >=      $dc->_deploy)
+            || (defined    $self->_deploy &&    $self->_count >=    $self->_deploy)
+            || !$self->_launch_service($dc, $service);
+        $service->_count($service->_count + 1);
+        $dc->_count(          $dc->_count + 1);
+        $self->_count(      $self->_count + 1);
+    }
 }
 
 1;

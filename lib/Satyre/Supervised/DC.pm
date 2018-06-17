@@ -75,17 +75,14 @@ sub update {
     my ($self, $service) = @_;
     $self->_count($self->_count + 1);
     my $nodes = $self->_nodes;
-    $nodes->{$service->{node}}->update($service) if exists $nodes->{$service->{node}};
+    $nodes->{$service->{node}}->update if exists $nodes->{$service->{node}};
 }
 
 #md_### launch()
 #md_
 sub launch {
     my $self = shift;
-    return
-        if $self->_deploy
-        && $self->_count >= $self->_deploy;
-    $_->launch(@_, $self) foreach shuffle values %{$self->_nodes};
+    $_->launch($self, @_) foreach shuffle values %{$self->_nodes};
 }
 
 1;
