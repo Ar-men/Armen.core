@@ -26,17 +26,34 @@ has 'name' => (
     is => 'ro', isa => Str, required => 1
 );
 
-#md_### _deploy
+#md_### deploy
 #md_
-has '_deploy' => (
+has 'deploy' => (
     is => 'rw', isa => Maybe[Int], default => sub { undef }, init_arg => undef
 );
 
-#md_### _count
+#md_### count
 #md_
-has '_count' => (
+has 'count' => (
     is => 'rw', isa => Int, default => sub { 0 }, init_arg => undef
 );
+
+#md_## Les méthodes
+#md_
+
+#md_### is_deployed()
+#md_
+sub is_deployed{
+    my ($self) = @_;
+    return defined $self->deploy && $self->count >= $self->deploy;
+}
+
+#md_### increment()
+#md_
+sub increment{
+    my ($self) = @_;
+    $self->count($self->count + 1);
+}
 
 1;
 __END__

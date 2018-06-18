@@ -62,7 +62,7 @@ sub _build__dcs {
 sub BUILD {
     my ($self, $attributes) = @_;
     my $deploy = $attributes->{deploy};
-    $self->_deploy($deploy->maybe_get_int('overall'));
+    $self->deploy($deploy->maybe_get_int('overall'));
     $self->_build__dcs($deploy);
 }
 
@@ -70,7 +70,7 @@ sub BUILD {
 #md_
 sub reset {
     my ($self) = @_;
-    $self->_count(0);
+    $self->count(0);
     $_->reset foreach values %{$self->_dcs};
 }
 
@@ -78,7 +78,7 @@ sub reset {
 #md_
 sub update {
     my ($self, $service) = @_;
-    $self->_count($self->_count + 1);
+    $self->count($self->count + 1);
     my $dcs = $self->_dcs;
     $dcs->{$service->{dc}}->update($service) if exists $dcs->{$service->{dc}};
 }

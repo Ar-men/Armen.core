@@ -57,7 +57,7 @@ sub _build__nodes {
 sub BUILD {
     my ($self, $attributes) = @_;
     my $deploy = $attributes->{deploy};
-    $self->_deploy($deploy->maybe_get_int('dc'));
+    $self->deploy($deploy->maybe_get_int('dc'));
     $self->_build__nodes($deploy);
 }
 
@@ -65,7 +65,7 @@ sub BUILD {
 #md_
 sub reset {
     my ($self) = @_;
-    $self->_count(0);
+    $self->count(0);
     $_->reset foreach values %{$self->_nodes};
 }
 
@@ -73,7 +73,7 @@ sub reset {
 #md_
 sub update {
     my ($self, $service) = @_;
-    $self->_count($self->_count + 1);
+    $self->count($self->count + 1);
     my $nodes = $self->_nodes;
     $nodes->{$service->{node}}->update if exists $nodes->{$service->{node}};
 }

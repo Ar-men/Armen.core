@@ -25,26 +25,27 @@ extends qw(Satyre::Supervised::Base);
 #md_
 sub BUILD {
     my ($self, $attributes) = @_;
-    $self->_deploy($attributes->{deploy}->maybe_get_int('node'));
+    $self->deploy($attributes->{deploy}->maybe_get_int('node'));
 }
 
 #md_### reset()
 #md_
-sub reset { $_[0]->_count(0) }
+sub reset { $_[0]->count(0) }
 
 #md_### update()
 #md_
-sub update {
-    my ($self) = @_;
-    $self->_count($self->_count + 1);
-}
+sub update { $_[0]->increment }
 
-#md_### _launch_service()
+#md_### _pre_register_service()
 #md_
-sub _launch_service {
+sub _pre_register_service {
     my ($self, $dc, $service) = @_;
     my $service_name = $service->name;
     my $id = create_uuid;
+    $self->logger->info(
+        'PreRegister',
+        [id => $id, service => $service_name, dc => $dc->name, node => $self->name, port => $service->port]
+    );
     my $port = $self->runner->discovery->pre_register_service(
         $id,
         $service_name,
@@ -54,43 +55,52 @@ sub _launch_service {
         $self->config->get_int('port_max'),
         $service->port
     );
+    return $id, $port;
+}
+
+#md_### _launch_service()
+#md_
+sub _launch_service {
+    my ($self, $dc, $service, $ssh) = @_;
+    my ($id, $port) = $self->_pre_register_service($dc, $service);
+    my $service_name = $service->name;
     $self->logger->info(
         'Launch', [id => $id, service => $service_name, dc => $dc->name, node => $self->name, port => $port]
     );
-    my $result;
-    if ($self->name eq $self->runner->node_name) {
-        system("armen.service --service=$service_name --id=$id --port=$port &");
-        $result = 1;
+    if ($ssh) {
+        $ssh->execute('./armen.service.sh', "--service=$service_name", "--id=$id", "--port=$port");
     }
     else {
-        my $ssh = $self->runner->get_resource('SSH', $self->name)->try_connect($self->logger);
-        if ($ssh) {
-            try {
-                $ssh->execute('./armen.service.sh', "--service=$service_name", "--id=$id", "--port=$port");
-                $result = 1;
-            }
-            catch {
-                $self->logger->error("$_");
-            };
-        }
+        system("armen.service --service=$service_name --id=$id --port=$port &");
     }
-    return $result;
 }
 
 #md_### launch()
 #md_
 sub launch {
     my ($self, $dc, $service) = @_;
-    for (;;) {
-        last
-            if (defined $service->_deploy && $service->_count >= $service->_deploy)
-            || (defined      $dc->_deploy &&      $dc->_count >=      $dc->_deploy)
-            || (defined    $self->_deploy &&    $self->_count >=    $self->_deploy)
-            || !$self->_launch_service($dc, $service);
-        $service->_count($service->_count + 1);
-        $dc->_count(          $dc->_count + 1);
-        $self->_count(      $self->_count + 1);
+    try {
+        my $ssh;
+        for (;;) {
+            last if $self->is_deployed || $service->is_deployed || $dc->is_deployed;
+            if ($self->name eq $self->runner->node_name) {
+                $self->_launch_service($dc, $service);
+            }
+            else {
+                if (!$ssh) {
+                    $ssh = $self->runner->get_resource('SSH', $self->name)->try_connect($self->logger);
+                    last unless $ssh;
+                }
+                $self->_launch_service($dc, $service, $ssh);
+            }
+            $service->increment;
+            $dc->increment;
+            $self->increment;
+        }
     }
+    catch {
+        $self->logger->error("$_");
+    };
 }
 
 1;
