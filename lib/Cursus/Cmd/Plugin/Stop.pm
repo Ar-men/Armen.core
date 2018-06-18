@@ -12,6 +12,7 @@ package Cursus::Cmd::Plugin::Stop;
 
 use Exclus::Exclus;
 use Moo;
+use Try::Tiny;
 use namespace::clean;
 
 extends qw(Cursus::Cmd::Plugin);
@@ -37,10 +38,18 @@ sub run {
                     say "---> ${service_name}[$_->{id}]";
                     my $node_name = $_->{node};
                     if ($node_name eq $self->runner->node_name) {
-                        kill 'TERM', $_->{pid};
+                        kill 'TERM', $pid;
                     }
                     else {
-                        #TODO
+                        my $ssh = $self->runner->get_resource('SSH', $node_name)->try_connect($self->logger);
+                        if ($ssh) {
+                            try {
+                                $ssh->kill('-TERM', $pid);
+                            }
+                            catch {
+                                $self->logger->error("$_");
+                            };
+                        }
                     }
                 }
             }
