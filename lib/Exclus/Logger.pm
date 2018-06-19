@@ -91,9 +91,9 @@ sub _cmp_level {
     return $_priorities->{$_[0]} >= $_priorities->{$_[1]};
 }
 
-#md_### _log()
+#md_### log()
 #md_
-sub _log {
+sub log {
     my ($self, $level) = (shift, shift);
     my $release = $self->_semaphore->acquire_then_release; ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     foreach (values %{$self->_outputs}) {
@@ -104,12 +104,12 @@ sub _log {
 
 #md_### debug(), info(), notice(), warning(), error(), critical()
 #md_
-sub debug    { shift->_log('debug',   @_) }
-sub info     { shift->_log('info',    @_) }
-sub notice   { shift->_log('notice',  @_) }
-sub warning  { shift->_log('warning', @_) }
-sub error    { shift->_log('err',     @_) }
-sub critical { shift->_log('crit',    @_) }
+sub debug    { shift->log('debug',   @_) }
+sub info     { shift->log('info',    @_) }
+sub notice   { shift->log('notice',  @_) }
+sub warning  { shift->log('warning', @_) }
+sub error    { shift->log('err',     @_) }
+sub critical { shift->log('crit',    @_) }
 
 #md_### unexpected_error()
 #md_
