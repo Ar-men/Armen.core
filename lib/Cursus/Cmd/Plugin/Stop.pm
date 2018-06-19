@@ -45,12 +45,7 @@ sub run {
                         $ssh->{$node_name} = $self->runner->get_resource('SSH', $node_name)->try_connect($self->logger)
                             unless exists $ssh->{$node_name};
                         if ($ssh->{$node_name}) {
-                            try {
-                                $ssh->{$node_name}->kill('-TERM', $pid);
-                            }
-                            catch {
-                                $self->logger->error("$_");
-                            };
+                            try { $ssh->{$node_name}->kill('-TERM', $pid) } catch { $self->logger->error("$_") };
                         }
                     }
                 }

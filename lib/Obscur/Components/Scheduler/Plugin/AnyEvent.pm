@@ -49,8 +49,7 @@ sub add_timer {
         $after,
         $repeat,
         sub {
-            try   { $cb->() }
-            catch { $self->logger->error("$_") };
+            try { $cb->() } catch { $self->logger->error("$_") };
             delete $self->_events->{$name}
                 unless $repeat;
         }
@@ -64,10 +63,7 @@ sub add_cron {
     $name //= $self->_get_auto_name;
     $self->_events->{$name} = AnyEvent::Timer::Cron->new(
         cron => $cron,
-        cb => sub {
-            try   { $cb->() }
-            catch { $self->logger->error("$_") };
-        },
+        cb => sub { try { $cb->() } catch { $self->logger->error("$_") }},
         time_zone => DateTime::TimeZone::Local->TimeZone()
     );
 }

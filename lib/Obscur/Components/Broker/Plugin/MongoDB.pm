@@ -98,16 +98,14 @@ sub publish {
 #md_
 sub try_publish {
     my ($self, @args) = @_;
-    try   { $self->publish(@args) }
-    catch { $self->logger->error("$_") };
+    try { $self->publish(@args) } catch { $self->logger->error("$_") };
 }
 
 #md_### _ack_message()
 #md_
 sub _ack_message {
     my ($self, $collection, $message) = @_;
-    try   { $collection->delete_one({_id => $message->id}) }
-    catch { $self->logger->error("$_") };
+    try { $collection->delete_one({_id => $message->id}) } catch { $self->logger->error("$_") };
 }
 
 #md_### _requeue_message()

@@ -60,8 +60,7 @@ sub connect { shift->_connect(@_) }
 sub try_connect {
     my ($self, $logger, @args) = @_;
     my $connection;
-    try   { $connection = $self->_connect($logger, @args) }
-    catch { $logger->warning("$_") };
+    try { $connection = $self->_connect($logger, @args) } catch { $logger->warning("$_") };
     return $connection;
 }
 
