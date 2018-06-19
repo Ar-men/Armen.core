@@ -60,6 +60,73 @@ sub _build__services {
     return $services;
 }
 
+#md_### _stop_service()
+#md_
+sub _stop_service {
+    my ($self, $ssh, $service) = @_;
+    my $node_name = $service->{node};
+    if ($node_name eq $self->node_name) {
+        kill 'TERM', $service->{pid};
+    }
+    else {
+        $ssh->{$node_name} = $self->get_resource('SSH', $node_name)->try_connect($self->logger)
+            unless exists $ssh->{$node_name};
+        if ($ssh->{$node_name}) {
+            try { $ssh->{$node_name}->kill('-TERM', $service->{pid}) } catch { $self->logger->error("$_") };
+        }
+    }
+}
+
+#md_### _check_services()
+#md_
+sub _check_services {
+    my ($self) = @_;
+    my $ssh = {};
+    my $heartbeat = $self->config->get_int('heartbeat');
+    foreach ($self->discovery->get_services) {
+        next if $_->{id} eq $self->id;
+        my $params = [id => $_->{id}, µs => $_->{name}, dc => $_->{dc}, node => $_->{node}];
+        if ($_->{status} eq 'running') {
+            my $elapsed = time - $_->{heartbeat};
+            push @$params, elapsed => $elapsed;
+            if ($elapsed >= $heartbeat * 4) {
+                $self->error("Ce µs n'est plus opérationnel, il va être tué", $params);
+                #TODO
+            }
+            elsif ($elapsed >= $heartbeat * 3) {
+                $self->error("Ce µs n'est plus opérationnel, il va être stoppé", $params);
+                $self->_stop_service($ssh, $_);
+            }
+            elsif ($elapsed >= $heartbeat * 2) {
+                $self->warning('Ce µs est-il opérationnel ?', $params);
+            }
+        }
+        else {
+            my $elapsed = time - $_->{timestamp};
+            push @$params, elapsed => $elapsed;
+            if ($_->{status} eq 'stopping') {
+                next if $_->{name} eq 'Maboul'; ##TODO armen.core ne connaît pas armen.jobs
+                if ($elapsed >= 5 * 4) {
+                    $self->error("Ce µs est bloqué, il va être tué", $params);
+                    #TODO
+                }
+                elsif ($elapsed >= 5 * 2) {
+                    $self->warning("Ce µs ne semble pas vouloir s'arrêter !", $params);
+                }
+            }
+            else { ## launched, starting
+                if ($elapsed >= 5 * 4) {
+                    $self->error("Ce µs est bloqué, il va être tué", $params);
+                    #TODO
+                }
+                elsif ($elapsed >= 5 * 2) {
+                    $self->warning('Ce µs ne semble pas vouloir se lancer !', $params);
+                }
+            }
+        }
+    }
+}
+
 #md_### _reset_counters()
 #md_
 sub _reset_counters { $_->reset foreach values %{$_[0]->_services} }
@@ -67,9 +134,9 @@ sub _reset_counters { $_->reset foreach values %{$_[0]->_services} }
 #md_### _update_counters()
 #md_
 sub _update_counters {
-    my $self = shift;
+    my ($self) = @_;
     my $services = $self->_services;
-    foreach (@_) {
+    foreach ($self->discovery->get_services) {
         next if $_->{status} eq 'stopping';
         $services->{$_->{name}}->update($_) if exists $services->{$_->{name}};
     }
@@ -88,9 +155,9 @@ sub _supervise {
         return if $self->is_stopping;
         $self->info('>>>> Supervise');
         try {
+            $self->_check_services;
             $self->_reset_counters;
-            my @services = $self->discovery->get_services;
-            $self->_update_counters(@services);
+            $self->_update_counters;
             $self->_launch_services;
         }
         catch {
