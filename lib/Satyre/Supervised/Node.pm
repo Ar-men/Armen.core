@@ -44,7 +44,7 @@ sub _pre_register_service {
     my $id = create_uuid;
     $self->logger->info(
         'PreRegister',
-        [id => $id, service => $service_name, dc => $dc->name, node => $self->name, port => $service->port]
+        [id => $id, µs => $service_name, dc => $dc->name, node => $self->name, port => $service->port]
     );
     my $port = $self->runner->discovery->pre_register_service(
         $id,
@@ -65,7 +65,7 @@ sub _launch_service {
     my ($id, $port) = $self->_pre_register_service($dc, $service);
     my $service_name = $service->name;
     $self->logger->info(
-        'Launch', [id => $id, service => $service_name, dc => $dc->name, node => $self->name, port => $port]
+        'Launch', [id => $id, µs => $service_name, dc => $dc->name, node => $self->name, port => $port]
     );
     if ($ssh) {
         $ssh->execute('./armen.service.sh', "--service=$service_name", "--id=$id", "--port=$port");

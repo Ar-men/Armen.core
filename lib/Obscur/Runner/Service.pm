@@ -215,8 +215,8 @@ sub run {
     my ($self) = @_;
     unless ($self->config->exists('services', $self->name)) {
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
-            message => "Ce service n'est pas déclaré",
-            params  => [service => $self->name]
+            message => "Ce µs n'est pas déclaré",
+            params  => [µs => $self->name]
         });
     }
     $self->info('Location', [dc => $self->dc_name, node => $self->node_name]);
