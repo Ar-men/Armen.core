@@ -13,6 +13,7 @@ package Satyre::Service;
 use Exclus::Exclus;
 use List::Util qw(shuffle);
 use Moo;
+use Safe::Isa qw($_isa);
 use Try::Tiny;
 use Types::Standard qw(HashRef InstanceOf);
 use Satyre::Supervised::Service;
@@ -82,19 +83,24 @@ sub _launch_services { $_->launch foreach shuffle values %{$_[0]->_services} }
 #md_
 sub _supervise {
     my ($self) = @_;
-    my $unlock = $self->sync->lock_w_unlock('supervise', 5000); ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    return if $self->is_stopping;
-    $self->info('>>>> Supervise');
     try {
-        $self->_reset_counters;
-        my @services = $self->discovery->get_services;
-        $self->_update_counters(@services);
-        $self->_launch_services;
+        my $unlock = $self->sync->lock_w_unlock('supervise', 5000); ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        return if $self->is_stopping;
+        $self->info('>>>> Supervise');
+        try {
+            $self->_reset_counters;
+            my @services = $self->discovery->get_services;
+            $self->_update_counters(@services);
+            $self->_launch_services;
+        }
+        catch {
+            $self->error("$_");
+        };
+        $self->info('<<<< Supervise');
     }
     catch {
-        $self->error("$_");
+        $self->logger->log($_->$_isa('EX::UnableToLock') ? 'notice' : 'err', "$_");
     };
-    $self->info('<<<< Supervise');
 }
 
 #md_### on_starting()
