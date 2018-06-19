@@ -30,6 +30,7 @@ sub run {
             push @args, $_->{id} foreach @services;
         }
         say 'Arrêt des µs:';
+        my $ssh = {};
         foreach my $arg (@args) {
             foreach (@services) {
                 my $service_name = $_->{name};
@@ -41,10 +42,11 @@ sub run {
                         kill 'TERM', $pid;
                     }
                     else {
-                        my $ssh = $self->runner->get_resource('SSH', $node_name)->try_connect($self->logger);
-                        if ($ssh) {
+                        $ssh->{$node_name} = $self->runner->get_resource('SSH', $node_name)->try_connect($self->logger)
+                            unless exists $ssh->{$node_name};
+                        if ($ssh->{$node_name}) {
                             try {
-                                $ssh->kill('-TERM', $pid);
+                                $ssh->{$node_name}->kill('-TERM', $pid);
                             }
                             catch {
                                 $self->logger->error("$_");
