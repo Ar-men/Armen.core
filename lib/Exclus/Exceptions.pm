@@ -145,13 +145,13 @@ sub try_run {
         }
     }
     catch {
-        my $ex = $_;
+        my $e = $_;
         $payload //= {};
-        if ($ex->$_isa($class)) {
-            $ex->payload({%$payload, %{$ex->payload}});
-            $ex->rethrow;
+        if ($e->$_isa($class)) {
+            $e->payload({%$payload, %{$e->payload}});
+            $e->rethrow;
         }
-        $class->throw({message => "$ex", payload => $payload});
+        $class->throw({message => "$e", payload => $payload});
     };
     return $wa ? @result : $result[0];
 }

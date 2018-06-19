@@ -90,8 +90,8 @@ sub run {
         push @watchers, AE::signal('INT', sub { $cv->send });
         $self->clear_terminal;
         $self->store_position;
-        my $ex = $cv->recv;
-        die $ex if $ex;
+        my $e = $cv->recv;
+        die $e if $e;
     }
     else {
         $self->_registered;
