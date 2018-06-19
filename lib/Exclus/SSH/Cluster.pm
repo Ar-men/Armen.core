@@ -59,9 +59,13 @@ sub connect { shift->_connect(@_) }
 #md_
 sub try_connect {
     my ($self, $logger, @args) = @_;
-    my $connection;
-    try { $connection = $self->_connect($logger, @args) } catch { $logger->warning("$_") };
-    return $connection;
+    return try {
+        return $self->_connect($logger, @args);
+    }
+    catch {
+        $logger->warning("$_");
+        return;
+    };
 }
 
 1;

@@ -28,9 +28,8 @@ our @EXPORT_OK = qw(parse);
 #md_
 sub _decode_json {
     my $json = shift;
-    my $data;
-    try {
-        $data = decode_json($json);
+    return try {
+        return decode_json($json);
     }
     catch {
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +37,6 @@ sub _decode_json {
             params  => [data => $json]
         });
     };
-    return $data;
 }
 
 #md_### parse()

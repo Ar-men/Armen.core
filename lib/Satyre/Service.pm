@@ -99,7 +99,7 @@ sub _supervise {
         $self->info('<<<< Supervise');
     }
     catch {
-        $self->logger->log($_->$_isa('EX::UnableToLock') ? 'notice' : 'err', "$_");
+        $self->logger->log($_->$_isa('EX::UnableToLock') ? 'warning' : 'err', "$_");
     };
 }
 

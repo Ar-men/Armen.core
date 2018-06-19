@@ -143,10 +143,15 @@ sub connect {
 sub try_connect {
     my ($self, $logger, $user, $opts) = @_;
     my ($username, $data) = $self->_get_username($user);
-    return if $data->{_failure} && time - $data->{_timestamp} <= $data->{_failure} * 60;
-    my $connection;
-    try { $connection = $self->_connect($logger, $opts, $username, $data) } catch { $logger->warning("$_") };
-    return $connection;
+    return
+        if $data->{_failure} && time - $data->{_timestamp} <= $data->{_failure} * 60;
+    return try {
+        return $self->_connect($logger, $opts, $username, $data);
+    }
+    catch {
+        $logger->warning("$_");
+        return;
+    };
 }
 
 1;
