@@ -156,7 +156,8 @@ sub update_service_heartbeat {
 sub get_services {
     my ($self) = @_;
     my @services = $self->_discovery->find->all;
-    $_->{id} = delete $_->{_id} foreach @services;
+    $_->{id} = delete $_->{_id}
+        foreach @services;
     return @services;
 }
 
