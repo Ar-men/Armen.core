@@ -153,12 +153,16 @@ sub update_service_heartbeat {
 
 #md_### get_services()
 #md_
-sub get_services {
-    my ($self) = @_;
-    my @services = $self->_discovery->find->all;
-    $_->{id} = delete $_->{_id}
-        foreach @services;
-    return @services;
+sub get_services { map { $_->{id} = delete $_->{_id}; $_ } $_[0]->_discovery->find->all }
+
+#md_### get_endpoint()
+#md_
+sub get_endpoint {
+    my ($self, $service_name) = @_;
+    my @services = shuffle $self->_discovery->find({name => $service_name, status => 'running'})->all;
+    return () unless @services;
+    my $service = $services[0];
+    return ($service->{node}, $service->{port});
 }
 
 1;

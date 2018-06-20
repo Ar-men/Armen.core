@@ -162,6 +162,7 @@ sub _get_status {
 sub _API {
     my ($self) = @_;
     $self->server->get('/v0/status', sub { $self->_get_status(@_) });
+    $self->$_call_if_can('build_API');
 }
 
 #md_### _update()
