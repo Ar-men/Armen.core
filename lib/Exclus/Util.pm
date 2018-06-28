@@ -22,14 +22,21 @@ use Scalar::Util qw(looks_like_number);
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 
 our @EXPORT_OK = qw(
+    $_call_if_can
     trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef
     dump_data  monkey_patch  key_value  plugin  deep_exists  ms_sleep t0 t0_ms_elapsed
     to_priority
-    $_call_if_can
 );
 
 #md_## Les méthodes
 #md_
+
+#md_### $_call_if_can()
+#md_
+our $_call_if_can = sub {
+    my ($object, $method) = (shift, shift);
+    return $object->can($method) ? $object->$method(@_) : undef;
+};
 
 #md_### trim_left()
 #md_
@@ -168,13 +175,6 @@ sub to_priority {
     return
         exists $_priorities->{$priority} ? $_priorities->{$priority} : 0;
 }
-
-#md_### $_call_if_can()
-#md_
-our $_call_if_can = sub {
-    my ($object, $method) = (shift, shift);
-    return $object->can($method) ? $object->$method(@_) : undef;
-};
 
 1;
 __END__

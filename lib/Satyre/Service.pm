@@ -89,15 +89,14 @@ sub _check_services {
         if ($_->{status} eq 'running') {
             my $elapsed = time - $_->{heartbeat};
             push @$params, elapsed => $elapsed;
-            if ($elapsed >= $heartbeat * 4) {
-                $self->error("Ce µs n'est plus opérationnel, il va être tué", $params);
-                #TODO
+            if ($elapsed > $heartbeat * 4) {
+                $self->error("Ce µs n'est plus opérationnel, il doit être tué", $params);
             }
-            elsif ($elapsed >= $heartbeat * 3) {
+            elsif ($elapsed > $heartbeat * 3) {
                 $self->error("Ce µs n'est plus opérationnel, il va être stoppé", $params);
                 $self->_stop_service($ssh, $_);
             }
-            elsif ($elapsed >= $heartbeat * 2) {
+            elsif ($elapsed > $heartbeat * 2) {
                 $self->warning('Ce µs est-il opérationnel ?', $params);
             }
         }
@@ -105,21 +104,23 @@ sub _check_services {
             my $elapsed = time - $_->{timestamp};
             push @$params, elapsed => $elapsed;
             if ($_->{status} eq 'stopping') {
-                next if $_->{name} eq 'Maboul'; ##TODO armen.core ne connaît pas armen.jobs
-                if ($elapsed >= 5 * 4) {
-                    $self->error("Ce µs est bloqué, il va être tué", $params);
-                    #TODO
+                if ($elapsed > 60) {
+                    $self->error("Ce µs est bloqué, il doit être tué", $params);
                 }
-                elsif ($elapsed >= 5 * 2) {
+                elsif ($elapsed > 30) {
+                    $self->warning("Ce µs ne semble pas vouloir s'arrêter !", $params);
+                }
+            }
+            elsif ($_->{status} eq 'STOPPING') {
+                if ($elapsed > 86400) {
                     $self->warning("Ce µs ne semble pas vouloir s'arrêter !", $params);
                 }
             }
             else { ## launched, starting
-                if ($elapsed >= 5 * 4) {
-                    $self->error("Ce µs est bloqué, il va être tué", $params);
-                    #TODO
+                if ($elapsed > 60) {
+                    $self->error("Ce µs est bloqué, il doit être tué", $params);
                 }
-                elsif ($elapsed >= 5 * 2) {
+                elsif ($elapsed > 30) {
                     $self->warning('Ce µs ne semble pas vouloir se lancer !', $params);
                 }
             }

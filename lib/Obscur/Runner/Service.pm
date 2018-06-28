@@ -44,6 +44,12 @@ has 'cfg' => (
     is => 'lazy', isa => InstanceOf['Exclus::Data'], init_arg => undef
 );
 
+#md_### long_stopping
+#md_
+has 'long_stopping' => (
+    is => 'ro', isa => Bool, default => sub { 0 }, init_arg => undef
+);
+
 #md_### is_stopping
 #md_
 has 'is_stopping' => (
@@ -193,7 +199,8 @@ sub _stop {
     return if $self->is_stopping;
     $self->is_stopping(1);
     $self->info('Stopping...');
-    try { $self->discovery->update_service_status($self, 'stopping') } catch { $self->error("$_") };
+    try   { $self->discovery->update_service_status($self, $self->long_stopping ? 'STOPPING' : 'stopping') }
+    catch { $self->error("$_") };
     $self->scheduler->remove;
     $self->$_call_if_can('on_stopping');
     $self->scheduler->add_timer(5, 2, sub { $self->_stop_loop if $self->is_ready_to_stop });
