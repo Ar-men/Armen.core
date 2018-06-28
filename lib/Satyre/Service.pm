@@ -63,17 +63,13 @@ sub _build__services {
 #md_### _stop_service()
 #md_
 sub _stop_service {
-    my ($self, $ssh, $service) = @_;
+    my ($self, $service) = @_;
     my $node_name = $service->{node};
     if ($node_name eq $self->node_name) {
         kill 'TERM', $service->{pid};
     }
-    else {
-        $ssh->{$node_name} = $self->get_resource('SSH', $node_name)->try_connect($self->logger)
-            unless exists $ssh->{$node_name};
-        if ($ssh->{$node_name}) {
-            try { $ssh->{$node_name}->kill('-TERM', $service->{pid}) } catch { $self->logger->error("$_") };
-        }
+    elsif (my $ssh = $self->get_resource('SSH', $node_name)->try_connect($self->logger)) {
+        try { $ssh->kill('-TERM', $service->{pid}) } catch { $self->logger->error("$_") };
     }
 }
 
@@ -81,7 +77,6 @@ sub _stop_service {
 #md_
 sub _check_services {
     my ($self) = @_;
-    my $ssh = {};
     my $heartbeat = $self->config->get_int('heartbeat');
     foreach ($self->discovery->get_services) {
         next if $_->{id} eq $self->id;
@@ -94,7 +89,7 @@ sub _check_services {
             }
             elsif ($elapsed > $heartbeat * 3) {
                 $self->error("Ce µs n'est plus opérationnel, il va être stoppé", $params);
-                $self->_stop_service($ssh, $_);
+                $self->_stop_service($_);
             }
             elsif ($elapsed > $heartbeat * 2) {
                 $self->warning('Ce µs est-il opérationnel ?', $params);

@@ -67,8 +67,9 @@ sub BUILD {
         unless (is_hashref($data)) {
             $data = defined $data ? {password => $data} : {};
         }
-        $data->{_failure}   = 0;
-        $data->{_timestamp} = 0;
+        $data->{_connection} = undef;
+        $data->{_failure}    = 0;
+        $data->{_timestamp}  = 0;
     }
 }
 
@@ -106,6 +107,10 @@ sub _get_username {
 #md_
 sub _connect {
     my ($self, $logger, $opts, $username, $data) = @_;
+    if ($data->{_connection} && time - $data->{_timestamp} <= 5 && !defined $opts) {
+        $data->{_timestamp} = time;
+        return $data->{_connection};
+    }
     my %options = (%{$self->options}, %{$opts || {}});
     $options{port} = $self->port;
     $options{user} = $username;
@@ -120,15 +125,18 @@ sub _connect {
     }
     my $ssh = Net::OpenSSH->new($self->server, %options);
     if ($ssh->error) {
-        $data->{_failure}  += 1;
-        $data->{_timestamp} = time;
+        $data->{_connection} = undef;
+        $data->{_failure}   += 1;
+        $data->{_timestamp}  = time;
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
             message => 'Impossible de se connecter à ce noeud SSH',
             params  => [node => $self->name, server => $self->server, username => $username, error => $ssh->error]
         });
     }
-    $data->{_failure} = 0;
-    return Exclus::SSH::Connection->new(logger => $logger, ssh => $ssh);
+    $data->{_connection} = Exclus::SSH::Connection->new(logger => $logger, ssh => $ssh);
+    $data->{_failure}    = 0;
+    $data->{_timestamp}  = time;
+    return $data->{_connection};
 }
 
 #md_### connect()

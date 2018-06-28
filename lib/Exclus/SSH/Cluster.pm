@@ -23,9 +23,9 @@ extends qw(Exclus::SSH::Base);
 #md_## Les attributs
 #md_
 
-#md_### nodes
+#md_### nodes_or_clusters
 #md_
-has 'nodes' => (
+has 'nodes_or_clusters' => (
     is => 'ro', isa => HashRef[InstanceOf['Exclus::SSH::Base']], required => 1
 );
 
@@ -40,7 +40,7 @@ sub is_cluster { 1 }
 #md_
 sub _connect {
     my $self = shift;
-    foreach (shuffle values %{$self->nodes}) {
+    foreach (shuffle values %{$self->nodes_or_clusters}) {
         my $connection = $_->try_connect(@_);
         return $connection
             if $connection;

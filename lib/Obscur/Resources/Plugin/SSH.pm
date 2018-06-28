@@ -30,7 +30,7 @@ sub build_resource {
     $name //= 'no_name';
     my $cfg = $self->cfg;
     if ($cfg->exists('cluster')) {
-        my $nodes = {};
+        my $nodes_or_clusters = {};
         foreach (@{$cfg->get({type => ArrayRef[Str]}, 'cluster')}) {
             if ($_ eq $name) {
                 EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////
@@ -45,9 +45,9 @@ sub build_resource {
 ##                  params  => [cluster => $name]
 ##              });
 ##          }
-            $nodes->{$_} = $resource;
+            $nodes_or_clusters->{$_} = $resource;
         }
-        return Exclus::SSH::Cluster->new(name => $name, nodes => $nodes);
+        return Exclus::SSH::Cluster->new(name => $name, nodes_or_clusters => $nodes_or_clusters);
     }
     else {
         return Exclus::SSH::Node->new(name => $name, %{$cfg->data});
