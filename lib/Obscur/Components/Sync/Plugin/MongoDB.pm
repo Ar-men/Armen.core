@@ -78,7 +78,7 @@ sub _find_or_insert {
                 });
             }
             else {
-                ms_sleep(10);
+                ms_sleep(50);
             }
         }
     }
@@ -111,7 +111,7 @@ sub _write_lock {
             });
         }
         else {
-            ms_sleep(10);
+            ms_sleep(50);
         }
     }
 }
@@ -170,7 +170,7 @@ sub _read_lock {
             });
         }
         else {
-            ms_sleep(10);
+            ms_sleep(50);
         }
     }
 }
