@@ -17,7 +17,7 @@ use Moo;
 use Safe::Isa qw($_isa);
 use Try::Tiny;
 use Types::Standard qw(InstanceOf);
-use Exclus::Exceptions qw(UnableToLock);
+use Exclus::Exceptions qw(Sync::UnableToLock);
 use Exclus::Util qw(ms_sleep t0 t0_ms_elapsed);
 use namespace::clean;
 
@@ -72,7 +72,7 @@ sub _find_or_insert {
         };
         unless ($end) {
             if (t0_ms_elapsed($t0) >= $timeout) {
-                EX::UnableToLock->throw({ ##////////////////////////////////////////////////////////////////////////////
+                EX::Sync::UnableToLock->throw({ ##//////////////////////////////////////////////////////////////////////
                     message => "Impossible de créer le verrou pour cette ressource",
                     params  => [resource => $resource, timeout => $timeout]
                 });
@@ -105,7 +105,7 @@ sub _write_lock {
         return 1
             if $result->modified_count;
         if (t0_ms_elapsed($t0) >= $timeout) {
-            EX::UnableToLock->throw({ ##////////////////////////////////////////////////////////////////////////////////
+            EX::Sync::UnableToLock->throw({ ##//////////////////////////////////////////////////////////////////////////
                 message => "Impossible d'acquérir cette ressource en écriture",
                 params  => [resource => $resource, timeout => $timeout]
             });
@@ -164,7 +164,7 @@ sub _read_lock {
         return 1
             if $result->modified_count;
         if (t0_ms_elapsed($t0) >= $timeout) {
-            EX::UnableToLock->throw({ ##////////////////////////////////////////////////////////////////////////////////
+            EX::Sync::UnableToLock->throw({ ##//////////////////////////////////////////////////////////////////////////
                 message => "Impossible d'acquérir cette ressource en lecture",
                 params  => [resource => $resource, timeout => $timeout]
             });

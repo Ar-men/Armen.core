@@ -162,7 +162,7 @@ sub _supervise {
         $self->info('<<<< Supervise');
     }
     catch {
-        $self->logger->log($_->$_isa('EX::UnableToLock') ? 'warning' : 'err', "$_");
+        $self->logger->log($_->$_isa('EX::Sync::UnableToLock') ? 'warning' : 'err', "$_");
     };
 }
 
