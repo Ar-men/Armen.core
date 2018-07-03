@@ -52,15 +52,9 @@ has '_client' => (
 #md_
 sub _build__client {
     my $self = shift;
-    my $codec = MongoDB::BSON->new(dt_type => 'Time::Moment');
-    return MongoDB::MongoClient->new(host => decrypt($self->uri), app_name => 'armen', bson_codec => $codec)
+    return MongoDB::MongoClient->new(host => decrypt($self->uri), app_name => 'armen')
         if $self->uri;
-    return MongoDB::MongoClient->new(
-        host       => $self->host,
-        bson_codec => $codec,
-        app_name   => 'armen',
-        %{$self->options}
-    );
+    return MongoDB::MongoClient->new(host => $self->host, app_name => 'armen', %{$self->options});
 }
 
 #md_### get_database()

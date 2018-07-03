@@ -11,10 +11,10 @@ package Obscur::Components::Sync::Plugin::MongoDB;
 #md_
 
 use Exclus::Exclus;
+use BSON::Types qw(bson_time);
 use Guard qw(guard);
 use Moo;
 use Safe::Isa qw($_isa);
-use Time::Moment;
 use Try::Tiny;
 use Types::Standard qw(InstanceOf);
 use Exclus::Exceptions qw(UnableToLock);
@@ -99,7 +99,7 @@ sub _write_lock {
                 readers => []
             },
             {
-                '$set' => {writer => $self->runner->id, acquired_at => Time::Moment->now}
+                '$set' => {writer => $self->runner->id, acquired_at => bson_time()}
             }
         );
         return 1
@@ -158,7 +158,7 @@ sub _read_lock {
             },
             {
                 '$addToSet' => {readers => $self->runner->id},
-                '$set'      => {acquired_at => Time::Moment->now}
+                '$set'      => {acquired_at => bson_time()}
             }
         );
         return 1

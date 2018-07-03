@@ -35,7 +35,6 @@ requires 'Safe::Isa';
 requires 'String::Random';
 requires 'Sys::Hostname::FQDN';
 requires 'Term::Table';
-requires 'Time::Moment';
 requires 'Try::Tiny';
 requires 'Type::Tiny';
 requires 'Type::Tiny::XS';
