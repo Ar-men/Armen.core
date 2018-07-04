@@ -19,7 +19,7 @@ use Try::Tiny;
 use Types::Standard qw(HashRef);
 use namespace::clean;
 
-extends qw(Obscur::Component);
+extends qw(Obscur::Object);
 
 #md_## Les attributs
 #md_

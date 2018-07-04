@@ -21,7 +21,7 @@ use Exclus::Exceptions qw(Sync::UnableToLock);
 use Exclus::Util qw(ms_sleep t0 t0_ms_elapsed);
 use namespace::clean;
 
-extends qw(Obscur::Component);
+extends qw(Obscur::Object);
 
 #md_## Les attributs
 #md_

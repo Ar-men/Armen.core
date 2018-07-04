@@ -91,7 +91,7 @@ foreach my $name (qw(broker client discovery scheduler server sync)) {
     has(
         $name => (
             is => 'ro',
-            isa => InstanceOf['Obscur::Component'],
+            isa => InstanceOf['Obscur::Object'],
             lazy => 1,
             default => sub { $_[0]->_build_component($name) }
         )
@@ -120,25 +120,30 @@ sub who_i_am {
     return {id => $self->id, name => $self->name, node => $self->node_name};
 }
 
+#md_### load_object()
+#md_
+sub load_object {
+    my ($self, $package, $name, $cfg) = @_;
+    my ($object, $plugin_name) = plugin($package, $name, {runner => $self, cfg => $cfg});
+    unless ($object->$_isa('Obscur::Object')) {
+        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
+            message => "La valeur renvoyée par ce plugin n'hérite pas de 'Obscur::Object'",
+            params  => [plugin => $plugin_name]
+        });
+    }
+    return $object;
+}
+
 #md_### _build_component()
 #md_
 sub _build_component {
     my ($self, $name) = @_;
     my $component_config = $self->config->create('components', $name);
-    my $use = $component_config->get_str('use');
-    my $cfg = $component_config->create({default => {}}, 'cfg');
-    my ($component, $plugin_name) = plugin(
+    return $self->load_object(
         'Obscur::Components::' . ucfirst $name,
-        $use,
-        {runner => $self, cfg => $cfg}
+        $component_config->get_str('use'),
+        $component_config->create({default => {}}, 'cfg')
     );
-    unless ($component->$_isa('Obscur::Component')) {
-        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
-            message => "La valeur renvoyée par ce plugin n'hérite pas de 'Obscur::Component'",
-            params  => [plugin => $plugin_name]
-        });
-    }
-    return $component;
 }
 
 #md_### build_resource()

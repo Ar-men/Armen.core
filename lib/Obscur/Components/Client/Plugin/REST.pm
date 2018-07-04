@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use Moo;
 use namespace::clean;
 
-extends qw(Obscur::Component);
+extends qw(Obscur::Object);
 
 1;
 __END__

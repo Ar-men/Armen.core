@@ -19,7 +19,7 @@ use Types::Standard qw(InstanceOf);
 use Exclus::Exceptions;
 use namespace::clean;
 
-extends qw(Obscur::Component);
+extends qw(Obscur::Object);
 
 #md_## Les attributs
 #md_

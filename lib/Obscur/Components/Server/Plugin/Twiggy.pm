@@ -20,7 +20,7 @@ use Types::Standard qw(InstanceOf);
 use Exclus::Util qw($_call_if_can);
 use namespace::clean;
 
-extends qw(Obscur::Component);
+extends qw(Obscur::Object);
 
 #md_## Les attributs
 #md_

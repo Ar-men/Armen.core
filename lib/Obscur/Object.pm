@@ -12,7 +12,7 @@ package Obscur::Object;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(HashRef InstanceOf);
+use Types::Standard qw(Bool HashRef InstanceOf);
 use Exclus::Data;
 use namespace::clean;
 
@@ -31,6 +31,16 @@ has 'cfg' => (
         return HashRef->check($value) ? Exclus::Data->new(data => $value) : $value
     },
     required => 1
+);
+
+#md_### debug
+#md_
+has 'debug' => (
+    is => 'ro',
+    isa => Bool,
+    lazy => 1,
+    default => sub { $_[0]->cfg->get_bool({default => 0}, 'debug') },
+    init_arg => undef
 );
 
 1;

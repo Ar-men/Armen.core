@@ -20,7 +20,7 @@ use Exclus::Exceptions;
 use Exclus::Message;
 use namespace::clean;
 
-extends qw(Obscur::Component);
+extends qw(Obscur::Object);
 
 #md_## Les attributs
 #md_
