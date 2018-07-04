@@ -91,7 +91,7 @@ foreach my $name (qw(broker client discovery scheduler server sync)) {
     has(
         $name => (
             is => 'ro',
-            isa => InstanceOf['Obscur::Object'],
+            isa => InstanceOf['Obscur::Component'],
             lazy => 1,
             default => sub { $_[0]->_build_component($name) }
         )
