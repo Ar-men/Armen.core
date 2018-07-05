@@ -17,6 +17,7 @@ use Guard qw(scope_guard);
 use Moo;
 use Try::Tiny;
 use Types::Standard qw(Bool InstanceOf Int Str);
+use Exclus::Environment;
 use Exclus::Exceptions;
 use Exclus::Util qw($_call_if_can);
 use namespace::clean;
@@ -167,8 +168,9 @@ sub _get_status {
 #md_
 sub _API {
     my ($self) = @_;
-    $self->server->get('/v0/status', sub { $self->_get_status(@_) });
-    $self->$_call_if_can('build_API');
+    my $api_key = env()->{api_key};
+    $self->server->get("/$api_key/v0/status", sub { $self->_get_status(@_) });
+    $self->$_call_if_can('build_API', $api_key);
 }
 
 #md_### _update()

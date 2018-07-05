@@ -17,7 +17,10 @@ our @EXPORT = qw(env);
 our @EXPORT_OK = qw(add_environment);
 
 my $_g_environment = {};
-add_environment({crypt_key => '@1/]IfA>~Q:dO[armen]{#{6I\(Z,7n@'});
+add_environment({
+    crypt_key => '@1/]IfA>~Q:dO[armen]{#{6I\(Z,7n@',
+    api_key   => 'lsm'
+});
 
 #md_## Les méthodes
 #md_

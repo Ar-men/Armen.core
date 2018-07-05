@@ -15,13 +15,14 @@ use AnyEvent::HTTP;
 use JSON::MaybeXS qw(decode_json encode_json);
 use Moo;
 use Plack::Response;
+use Exclus::Environment;
 use Exclus::Exceptions;
 use namespace::clean;
 
 extends qw(Obscur::Runner::Service);
 
 AnyEvent::HTTP::set_proxy(undef);
-$AnyEvent::HTTP::USERAGENT = 'armen.core/Blocus';
+$AnyEvent::HTTP::USERAGENT = 'armen/armen.core/Blocus';
 
 #md_## Les attributs
 #md_
@@ -49,9 +50,11 @@ sub _api_gatekeeper {
             params  => [µs => $service]
         });
     }
+    my $api_key = env()->{api_key};
+    my $rr_id = $rr->id;
     http_request(
         $rr->request->method,
-        "http://$node:$port/armen/api/v$version/$asterisk?\@id=" . $rr->id,
+        "http://$node:$port/armen/api/$api_key/v$version/$asterisk?\@id=$rr_id",
         body    => $rr->request->content,
         headers => {@{$rr->request->headers->psgi_flatten_without_sort}},
         timeout => 60,
