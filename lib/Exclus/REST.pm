@@ -80,6 +80,7 @@ sub request {
 #md_
 sub get_content {
     my ($self, $response) = @_;
+    my $content;
     my $headers = $response->{headers};
     if (exists $headers->{'content-type'}) {
         my $content_type = $headers->{'content-type'};
