@@ -89,7 +89,7 @@ sub _add_events {
 #md_
 sub on_starting {
     my ($self) = @_;
-    $self->_add_events($self->cfg->create({default => {}}, 'events'));
+    $self->_add_events($self->config->create({default => {}}, 'events'));
 }
 
 1;
