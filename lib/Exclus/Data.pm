@@ -126,7 +126,7 @@ foreach my $type (ArrayRef, Bool, HashRef, Int, Num, Str) {
             my $self = shift;
             my $opts = is_hashref($_[0]) ? shift : {};
             $opts->{type} = Maybe[$type];
-            $opts->{default} = undef;
+            undef($opts->{default});
             return $self->get($opts, @_);
         }
     );

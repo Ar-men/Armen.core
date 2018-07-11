@@ -77,7 +77,7 @@ sub pre_register_service {
                         params  => [port => $port]
                     });
                 }
-                $port = undef;
+                undef($port);
             }
             else {
                 die $_;
@@ -120,7 +120,7 @@ sub register_service {
                         params  => [port => $port]
                     });
                 }
-                $port = undef;
+                undef($port);
             }
             else {
                 die $_;

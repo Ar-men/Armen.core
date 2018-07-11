@@ -67,9 +67,9 @@ sub BUILD {
         unless (is_hashref($data)) {
             $data = defined $data ? {password => $data} : {};
         }
-        $data->{_connection} = undef;
-        $data->{_failure}    = 0;
-        $data->{_timestamp}  = 0;
+        undef($data->{_connection});
+        $data->{_failure}   = 0;
+        $data->{_timestamp} = 0;
     }
 }
 
@@ -125,9 +125,9 @@ sub _connect {
     }
     my $ssh = Net::OpenSSH->new($self->server, %options);
     if ($ssh->error) {
-        $data->{_connection} = undef;
-        $data->{_failure}   += 1;
-        $data->{_timestamp}  = time;
+        undef($data->{_connection});
+        $data->{_failure}  += 1;
+        $data->{_timestamp} = time;
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
             message => 'Impossible de se connecter à ce noeud SSH',
             params  => [node => $self->name, server => $self->server, username => $username, error => $ssh->error]
