@@ -42,34 +42,6 @@ sub exists {
     return deep_exists($self->data, @_);
 }
 
-#md_### find()
-#md_
-sub find {
-    my (undef, $data) = (shift, shift);
-    my $opts = is_hashref($_[0]) ? shift : {};
-    my @keys = @_;
-    foreach (@keys) {
-        unless (is_hashref($data) && exists $data->{$_}) {
-            if (exists $opts->{default}) {
-                $data = $opts->{default};
-                last;
-            }
-            EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
-                message => "La donnée est introuvable",
-                params  => [keys => join('|', @keys)]
-            });
-        }
-        $data = $data->{$_};
-    }
-    if (exists $opts->{type} && !$opts->{type}->check($data)) {
-        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
-            message => "La donnée trouvée n'est pas du bon type",
-            params  => [type => "$opts->{type}", keys => join('|', @keys)]
-        });
-    }
-    return $data;
-}
-
 #md_### get()
 #md_
 sub get { return __PACKAGE__->find(shift->data, @_) }
@@ -106,7 +78,7 @@ sub foreach_key {
                 : @keys;
 }
 
-#md_### get_(arrayref|bool|hashref|int|num|str)()
+#md_### [maybe_]get_(arrayref|bool|hashref|int|num|str)()
 #md_
 foreach my $type (ArrayRef, Bool, HashRef, Int, Num, Str) {
     monkey_patch(
@@ -135,6 +107,37 @@ foreach my $type (ArrayRef, Bool, HashRef, Int, Num, Str) {
 #md_### maybe_get_any()
 #md_
 sub maybe_get_any { shift->get({type => Maybe[ArrayRef|Bool|HashRef|Int|Num|Str], default => undef}, @_) }
+
+#md_## Les méthodes de la classe
+#md_
+
+#md_### find()
+#md_
+sub find {
+    my ($class, $data) = (shift, shift);
+    my $opts = is_hashref($_[0]) ? shift : {};
+    my @keys = @_;
+    foreach (@keys) {
+        unless (is_hashref($data) && exists $data->{$_}) {
+            if (exists $opts->{default}) {
+                $data = $opts->{default};
+                last;
+            }
+            EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
+                message => "La donnée est introuvable",
+                params  => [keys => join('|', @keys)]
+            });
+        }
+        $data = $data->{$_};
+    }
+    if (exists $opts->{type} && !$opts->{type}->check($data)) {
+        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
+            message => "La donnée trouvée n'est pas du bon type",
+            params  => [type => "$opts->{type}", keys => join('|', @keys)]
+        });
+    }
+    return $data;
+}
 
 1;
 __END__

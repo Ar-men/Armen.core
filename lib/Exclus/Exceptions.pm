@@ -125,8 +125,8 @@ sub confess_trace {
 #md_### TODO()
 #md_
 sub TODO {
-    my ($class) = @_;
-    $class->throw({message => 'A faire (non implémenté)', trace => $class->simple_trace});
+    my $class = shift;
+    $class->throw({message => 'A faire (non implémenté)', trace => $class->simple_trace, @_});
 }
 
 #md_### try_run()
