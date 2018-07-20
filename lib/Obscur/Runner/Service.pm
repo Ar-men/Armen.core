@@ -163,13 +163,47 @@ sub _get_status {
     });
     $respond->($rr->render->finalize);
 }
+#md_### _execute_cmd()
+#md_
+sub _execute_cmd {
+    my ($self, $respond, $rr, $p) = @_;
+    my @args = @{$p->get_arrayref({default => []}, 'args')};
+    if (@args) {
+        my $cmd = shift @args;
+        my $method = "cmd_$cmd";
+        if ($self->can($method)) {
+            try {
+                $self->$method(@args);
+            }
+            catch {
+                my $e = "$_";
+                $self->error($e);
+                $rr->error("L'exécution de la commande a généré une exception")
+                    ->set_key_value(cmd => $cmd)
+                    ->set_key_value(exception => $e)
+                    ->status(500);
+            };
+        }
+        else {
+            $rr->error("La commande spécifiée n'est pas valide")
+                ->set_key_value(cmd => $cmd)
+                ->status(400);
+        }
+    }
+    else {
+        $rr->error("Le nom de la commande à exécuter n'est pas mentionnée")
+            ->status(400);
+    }
+    $respond->($rr->render->finalize);
+}
 
 #md_### _API()
 #md_
 sub _API {
     my ($self) = @_;
     my $api_key = env()->{api_key};
-    $self->server->get("/$api_key/v0/status", sub { $self->_get_status(@_) });
+    $self->server->get( "/$api_key/v0/status",  sub { $self->_get_status( @_) });
+    $self->server->post("/$api_key/v0/execute", sub { $self->_execute_cmd(@_) });
     $self->$_call_if_can('build_API', $api_key);
 }
 
