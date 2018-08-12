@@ -173,14 +173,13 @@ sub _execute_cmd {
         my $method = "cmd_$cmd";
         if ($self->can($method)) {
             try {
-                $self->$method(@args);
+                $rr->payload($self->$method(@args));
             }
             catch {
                 my $e = "$_";
                 $self->error($e);
-                $rr->error("L'exécution de la commande a généré une exception")
+                $rr->error($e)
                     ->set_key_value(cmd => $cmd)
-                    ->set_key_value(exception => $e)
                     ->status(500);
             };
         }
