@@ -42,7 +42,7 @@ sub set_default {
 
 #md_### _configure_options()
 #md_
-sub _configure_options { Configure(qw(default pass_through no_auto_abbrev no_ignore_case)) }
+sub _configure_options { Configure(qw(default pass_through no_getopt_compat)) }
 
 #md_### _get_options()
 #md_

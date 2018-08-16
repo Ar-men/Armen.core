@@ -19,7 +19,7 @@ sub _get_service {
     my $service = 'Satyre';
     my $attributes = {};
     my $handler = sub { $attributes->{$_[0]} = $_[1] };
-    Configure(qw(default pass_through no_auto_abbrev no_ignore_case));
+    Configure(qw(default pass_through no_getopt_compat));
     GetOptions(
         "service=s" => \$service,
         "id=s"      => $handler,
