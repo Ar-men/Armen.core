@@ -22,6 +22,20 @@ extends qw(Obscur::Object);
 #md_## Les méthodes
 #md_
 
+#md_### request_endpoint()
+#md_
+sub request_endpoint{
+    my ($self, $node, $port, $method, $query, @args) = @_;
+    my $api_key = env()->{api_key};
+    my $client = Exclus::REST->new(timeout => 5);
+    $client->send_json({args => \@args});
+    my ($success, $response) = $client->request($method, "http://$node:$port/armen/api/$api_key/v0/$query");
+    my $content = $client->get_content($response);
+    return $content->{payload}
+        if $success;
+    EX->throw({message => "L'appel du µs a échoué", params => [defined $content ? %$content : %$response]});
+}
+
 #md_### request()
 #md_
 sub request {
@@ -33,14 +47,7 @@ sub request {
             params  => [µs => $service]
         });
     }
-    my $api_key = env()->{api_key};
-    my $client = Exclus::REST->new(timeout => 10);
-    $client->send_json({args => \@args});
-    my ($success, $response) = $client->request($method, "http://$node:$port/armen/api/$api_key/v0/$query");
-    my $content = $client->get_content($response);
-    return $content->{payload}
-        if $success;
-    EX->throw({message => "L'appel de ce µs est un échec", params => [%$response]});
+    $self->request_endpoint($node, $port, $method, $query, @args);
 }
 
 #md_### delete(), get(), post(), put()
