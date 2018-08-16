@@ -33,7 +33,10 @@ sub request_endpoint{
     my $content = $client->get_content($response);
     return $content->{payload}
         if $success;
-    EX->throw({message => "L'appel du µs a échoué", params => [defined $content ? %$content : %$response]});
+    EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////////
+        message => "L'appel du µs a échoué",
+        params  => [defined $content ? %$content : %$response]
+    });
 }
 
 #md_### request()
