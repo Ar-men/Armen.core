@@ -23,18 +23,18 @@ extends qw(Cursus::Cmd::Plugin);
 #md_### run()
 #md_
 sub run {
-    my ($self, @args) = @_;
+    my ($self, @to_stop) = @_;
     my @services = $self->runner->discovery->get_services;
     if (@services) {
-        unless (@args) {
-            push @args, $_->{id} foreach @services;
+        unless (@to_stop) {
+            push @to_stop, $_->{id} foreach @services;
         }
         say 'Arrêt des µs:';
-        foreach my $arg (@args) {
+        foreach my $value (@to_stop) {
             foreach (@services) {
                 my $service_name = $_->{name};
                 my $pid = $_->{pid};
-                if (($arg eq $_->{id} || ucfirst(lc($arg)) eq $service_name) && $pid ne '#') {
+                if (($value eq $_->{id} || ucfirst(lc($value)) eq $service_name) && $pid ne '#') {
                     say "---> ${service_name}[$_->{id}]";
                     my $node_name = $_->{node};
                     if ($node_name eq $self->runner->node_name) {

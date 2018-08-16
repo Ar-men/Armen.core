@@ -24,7 +24,7 @@ use namespace::clean;
 #md_### timeout
 #md_
 has 'timeout' => (
-    is => 'ro', isa => Int, default => sub { 10 }
+    is => 'ro', isa => Int, default => sub { 5 }
 );
 
 #md_### _client

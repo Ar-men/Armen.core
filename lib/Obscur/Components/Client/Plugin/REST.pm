@@ -34,7 +34,7 @@ sub request {
         });
     }
     my $api_key = env()->{api_key};
-    my $client = Exclus::REST->new;
+    my $client = Exclus::REST->new(timeout => 10);
     $client->send_json({args => \@args});
     my ($success, $response) = $client->request($method, "http://$node:$port/armen/api/$api_key/v0/$query");
     my $content = $client->get_content($response);

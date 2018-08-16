@@ -81,17 +81,17 @@ __END__
 
 =head1 Les commandes:
 
-    armen help                        [subcommand] - Afficher l'aide en général ou pour une sous-commande
-    armen version                                  - Afficher la liste des projets et leur numéro de version
-    armen available                                - Afficher la liste des µs déclarés
-    armen registered                               - Afficher la liste des µs enregistrés
-    armen start                      [µs.name ...] - Lancer de nouvelles instances de µs
-    armen stop                  [µs.(id|name) ...] - Stopper les µs spécifiés
-    armen kill                             <µs.id> - Tuer le µs spécifié
-    armen execute [µs.(id|name) [cmd [value ...]]] - Exécution d'une commande par les µs spécifiés
+    armen help                       [subcommand] - Afficher l'aide en général ou pour une sous-commande
+    armen version                                 - Afficher la liste des projets et leur numéro de version
+    armen available                               - Afficher la liste des µs déclarés
+    armen registered                              - Afficher la liste des µs enregistrés
+    armen start                     [µs.name ...] - Lancer de nouvelles instances de µs
+    armen stop                 [µs.(id|name) ...] - Stopper les µs spécifiés
+    armen kill                            <µs.id> - Tuer le µs spécifié
+    armen execute [µs.(id|name) [cmd [args ...]]] - Exécution d'une commande par les µs spécifiés
     ----- -------
-    armen encrypt                         <string> - Crypter une chaine de caractères
-    armen decrypt                         <string> - Décrypter une chaine préalablement cryptée
+    armen encrypt                        <string> - Crypter une chaine de caractères
+    armen decrypt                        <string> - Décrypter une chaine préalablement cryptée
     ----- -------
 
     ...

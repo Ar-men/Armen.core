@@ -22,12 +22,12 @@ extends qw(Cursus::Cmd::Plugin);
 #md_### run()
 #md_
 sub run {
-    my ($self, @args) = @_;
+    my ($self, @to_start) = @_;
     my $services = $self->config->create({default => {}}, 'services');
     if ($services->count_keys) {
-        push @args, 'Satyre' unless @args;
+        push @to_start, 'Satyre' unless @to_start;
         say 'Lancement des µs:';
-        foreach (@args) {
+        foreach (@to_start) {
             my $service = ucfirst(lc($_));
             say "---> $service";
             if ($services->exists($service)) {
