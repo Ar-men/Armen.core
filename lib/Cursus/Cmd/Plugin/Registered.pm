@@ -59,7 +59,7 @@ sub _registered {
                 $_->{pid}
             ];
         }
-        $self->render_table($rows, qw(ID NAME STATUS DC NODE PORT HEARTBEAT UPTIME PID));
+        $self->display_table($rows, qw(ID NAME STATUS DC NODE PORT HEARTBEAT UPTIME PID));
     }
     else {
         say "Aucun µs n'est enregistré.";

@@ -12,7 +12,7 @@ package Cursus::Cmd::Plugin;
 
 use Exclus::Exclus;
 use Moo;
-use Term::Table;
+use Exclus::Util qw(format_table);
 use namespace::clean;
 
 extends qw(Obscur::Context);
@@ -39,12 +39,11 @@ sub store_position { print "\e7"  }
 #md_
 sub restore_position { print "\e8"  }
 
-#md_### render_table()
+#md_### display_table()
 #md_
-sub render_table {
-    my ($self, $rows) = (shift, shift);
-    return unless @$rows;
-    say foreach Term::Table->new(max_width => 150, header => [@_], rows => $rows)->render;
+sub display_table {
+    shift;
+    say foreach format_table(@_);
 }
 
 #md_### run()

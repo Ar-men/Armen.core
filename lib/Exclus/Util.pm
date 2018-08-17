@@ -19,13 +19,14 @@ use Module::Runtime qw(use_module);
 use POSIX qw(strftime);
 use Ref::Util qw(is_ref is_hashref);
 use Scalar::Util qw(looks_like_number);
+use Term::Table;
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 
 our @EXPORT_OK = qw(
     $_call_if_can
     trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef
     dump_data  monkey_patch  key_value  plugin  deep_exists  ms_sleep t0 t0_ms_elapsed
-    to_priority
+    to_priority format_table render_table
 );
 
 #md_## Les méthodes
@@ -175,6 +176,18 @@ sub to_priority {
     return
         exists $_priorities->{$priority} ? $_priorities->{$priority} : 0;
 }
+
+#md_### format_table()
+#md_
+sub format_table {
+    my $rows = shift;
+    return () unless @$rows;
+    return Term::Table->new(max_width => 150, header => [@_], rows => $rows)->render;
+}
+
+#md_### render_table()
+#md_
+sub render_table { return join("\n", format_table(@_)) }
 
 1;
 __END__

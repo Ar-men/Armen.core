@@ -65,7 +65,7 @@ sub run {
                 push @$rows, $row;
             }
         );
-        $self->render_table($rows, qw(NAME DISABLED PORT DEPLOY));
+        $self->display_table($rows, qw(NAME DISABLED PORT DEPLOY));
     }
     else {
         say "Aucun µs n'a été déclaré.";
