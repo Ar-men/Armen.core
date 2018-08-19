@@ -54,6 +54,8 @@ sub add_timer {
                 unless $repeat;
         }
     );
+    return $name;
+
 }
 
 #md_### add_cron()
@@ -66,6 +68,7 @@ sub add_cron {
         cb => sub { try { $cb->() } catch { $self->logger->error("$_") }},
         time_zone => DateTime::TimeZone::Local->TimeZone()
     );
+    return $name;
 }
 
 #md_### remove()

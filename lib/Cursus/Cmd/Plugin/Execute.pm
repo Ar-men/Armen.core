@@ -12,8 +12,8 @@ package Cursus::Cmd::Plugin::Execute;
 
 use Exclus::Exclus;
 use Moo;
+use Ref::Util qw(is_ref);
 use Try::Tiny;
-use Exclus::Util qw(dump_data);
 use namespace::clean;
 
 extends qw(Cursus::Cmd::Plugin);
@@ -44,9 +44,10 @@ sub run {
                 if ($value eq $_->{id} || ucfirst(lc($value)) eq $service_name) {
                     say "---> ${service_name}[$_->{id}]";
                     try   {
-                        say dump_data(
-                            $client->request_endpoint($_->{node}, $_->{port}, 'POST', 'execute', @args)
-                        );
+                        my $data = $client->request_endpoint($_->{node}, $_->{port}, 'POST', 'execute', @args);
+                        say $data
+                            unless !defined $data
+                                || (defined $data && !is_ref($data) && $data eq '');
                     }
                     catch {
                         say "$_";

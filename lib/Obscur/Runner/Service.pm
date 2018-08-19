@@ -20,7 +20,7 @@ use Types::Standard qw(Bool HashRef InstanceOf Int Str);
 use Exclus::Environment;
 use Exclus::Exceptions;
 use Exclus::Util qw($_call_if_can dump_data key_value);
-use Exclus::Util::Advanced qw(get_options);
+use Exclus::Util::Advanced qw(get_cmd_options);
 use namespace::clean;
 
 extends qw(Obscur::Runner::Process);
@@ -132,7 +132,7 @@ sub cmd_help {
     my @help = ('Help:');
     my $cmds = $self->_API_cmds;
     foreach my $cmd (sort keys %$cmds) {
-        push @help, "\t$cmd";
+        push @help, "\t$cmd:";
         push @help, "\t\toptions:";
         push @help, "\t\t\t$_" foreach @{key_value($cmds->{$cmd}, 'options', [])};
         push @help, "\t\tdefault values: " . dump_data(key_value($cmds->{$cmd}, 'default', {}));
@@ -200,10 +200,12 @@ sub _execute_cmd {
         if ($self->can($method)) {
             try {
                 my $API_cmds = key_value($self->_API_cmds, $cmd, {});
-                my $options = get_options(
+                my $options = get_cmd_options(
+                    $cmd,
                     $args,
-                    key_value($API_cmds, 'options', []),
-                    key_value($API_cmds, 'default', {})
+                    key_value($API_cmds, 'options',  []),
+                    key_value($API_cmds, 'default',  {}),
+                    key_value($API_cmds, 'required', [])
                 );
                 $rr->payload($self->$method($options));
             }

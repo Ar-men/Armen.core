@@ -17,22 +17,32 @@ use Exclus::Data;
 use Exclus::Exceptions;
 
 our @EXPORT_OK = qw(
-    get_options
+    get_cmd_options
 );
 
 #md_## Les méthodes
 #md_
 
-#md_### get_options()
+#md_### get_cmd_options()
 #md_
-sub get_options {
-    my ($args, $options, $default) = @_;
+sub get_cmd_options {
+    my ($cmd, $args, $options, $default, $required) = @_;
     local $SIG;
-    $SIG{__WARN__} = sub { EX->throw($_[0]) };
+    $SIG{__WARN__} = sub {
+        EX->throw($_[0]); ##////////////////////////////////////////////////////////////////////////////////////////////
+    };
     my $data = $default ? {%$default} : {};
     my $parser = Getopt::Long::Parser->new;
     $parser->configure(qw(no_getopt_compat));
     $parser->getoptionsfromarray($args, map {m!^(\w+)!; $_ => \$data->{$1}} @$options);
+    foreach (@$required) {
+        unless (defined $data->{$_}) {
+            EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
+                message => 'Cette option est requise pour cette commande',
+                params  => [cmd => $cmd, option => $_]
+            });
+        }
+    }
     return Exclus::Data->new(data => $data);
 }
 
