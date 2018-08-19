@@ -153,7 +153,10 @@ sub update_service_heartbeat {
 
 #md_### get_services()
 #md_
-sub get_services { map { $_->{id} = delete $_->{_id}; $_ } $_[0]->_discovery->find->all }
+sub get_services {
+    my ($self, $status) = @_;
+    return map { $_->{id} = delete $_->{_id}; $_ } $_[0]->_discovery->find($status ? {status => $status} : {})->all
+}
 
 #md_### get_endpoint()
 #md_

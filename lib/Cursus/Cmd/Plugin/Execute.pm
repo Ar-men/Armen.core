@@ -26,7 +26,7 @@ extends qw(Cursus::Cmd::Plugin);
 sub run {
     my ($self, $services, @args) = @_;
     my $runner = $self->runner;
-    my @services = $runner->discovery->get_services;
+    my @services = $runner->discovery->get_services('running');
     if (@services) {
         my @to_call;
         if ($services) {
@@ -41,7 +41,7 @@ sub run {
         foreach my $value (@to_call) {
             foreach (@services) {
                 my $service_name = $_->{name};
-                if (($value eq $_->{id} || ucfirst(lc($value)) eq $service_name) && $_->{status} eq 'running') {
+                if ($value eq $_->{id} || ucfirst(lc($value)) eq $service_name) {
                     say "---> ${service_name}[$_->{id}]";
                     try   {
                         say dump_data(
@@ -56,7 +56,7 @@ sub run {
         }
     }
     else {
-        say "Aucun µs n'est enregistré.";
+        say "Aucun µs n'est en cours d'exécution.";
     }
 }
 
