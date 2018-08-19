@@ -13,6 +13,7 @@ package Cursus::Cmd::Plugin::Execute;
 use Exclus::Exclus;
 use Moo;
 use Try::Tiny;
+use Exclus::Util qw(dump_data);
 use namespace::clean;
 
 extends qw(Cursus::Cmd::Plugin);
@@ -42,8 +43,14 @@ sub run {
                 my $service_name = $_->{name};
                 if (($value eq $_->{id} || ucfirst(lc($value)) eq $service_name) && $_->{status} eq 'running') {
                     say "---> ${service_name}[$_->{id}]";
-                    try   { say $client->request_endpoint($_->{node}, $_->{port}, 'POST', 'execute', @args) }
-                    catch { say "$_" };
+                    try   {
+                        say dump_data(
+                            $client->request_endpoint($_->{node}, $_->{port}, 'POST', 'execute', @args)
+                        );
+                    }
+                    catch {
+                        say "$_";
+                    };
                 }
             }
         }

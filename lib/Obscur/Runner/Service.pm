@@ -16,10 +16,11 @@ use AnyEvent;
 use Guard qw(scope_guard);
 use Moo;
 use Try::Tiny;
-use Types::Standard qw(Bool InstanceOf Int Str);
+use Types::Standard qw(Bool HashRef InstanceOf Int Str);
 use Exclus::Environment;
 use Exclus::Exceptions;
-use Exclus::Util qw($_call_if_can);
+use Exclus::Util qw($_call_if_can dump_data key_value);
+use Exclus::Util::Advanced qw(get_options);
 use namespace::clean;
 
 extends qw(Obscur::Runner::Process);
@@ -61,6 +62,12 @@ has 'is_stopping' => (
 #md_
 has '_cv_stop' => (
     is => 'ro', isa => InstanceOf['AnyEvent::CondVar'], default => sub { AE::cv }, init_arg => undef
+);
+
+#md_### _API_cmds
+#md_
+has '_API_cmds' => (
+    is => 'lazy', isa => HashRef, init_arg => undef
 );
 
 #md_## Les méthodes
@@ -110,8 +117,27 @@ sub _build_dc_name {
 #md_### _build_cfg()
 #md_
 sub _build_cfg {
-    my $self= shift;
+    my $self = shift;
     return $self->config->create({default => {}}, 'services', $self->name, 'cfg');
+}
+
+#md_### _build__API_cmds()
+#md_
+sub _build__API_cmds { return $_[0]->$_call_if_can('get_API_cmds') // {} }
+
+#md_### cmd_help()
+#md_
+sub cmd_help {
+    my ($self) = @_;
+    my @help = ('Help:');
+    my $cmds = $self->_API_cmds;
+    foreach my $cmd (sort keys %$cmds) {
+        push @help, "\t$cmd";
+        push @help, "\t\toptions:";
+        push @help, "\t\t\t$_" foreach @{key_value($cmds->{$cmd}, 'options', [])};
+        push @help, "\t\tdefault values: " . dump_data(key_value($cmds->{$cmd}, 'default', {}));
+    }
+    return join("\n", @help);
 }
 
 #md_### set_config_default()
@@ -167,13 +193,19 @@ sub _get_status {
 #md_
 sub _execute_cmd {
     my ($self, $respond, $rr, $p) = @_;
-    my @args = @{$p->get_arrayref({default => []}, 'args')};
-    if (@args) {
-        my $cmd = shift @args;
+    my $args = $p->get_arrayref({default => []}, 'args');
+    if (@$args) {
+        my $cmd = shift @$args;
         my $method = "cmd_$cmd";
         if ($self->can($method)) {
             try {
-                $rr->payload($self->$method(@args));
+                my $API_cmds = key_value($self->_API_cmds, $cmd, {});
+                my $options = get_options(
+                    $args,
+                    key_value($API_cmds, 'options', []),
+                    key_value($API_cmds, 'default', {})
+                );
+                $rr->payload($self->$method($options));
             }
             catch {
                 my $e = "$_";

@@ -26,13 +26,13 @@ our @EXPORT_OK = qw(
 #md_### get_options()
 #md_
 sub get_options {
-    my $options = shift;
+    my ($args, $options, $default) = @_;
     local $SIG;
     $SIG{__WARN__} = sub { EX->throw($_[0]) };
-    my $data = ref $_[-1] eq 'HASH' ? pop @_ : {};
+    my $data = $default ? {%$default} : {};
     my $parser = Getopt::Long::Parser->new;
     $parser->configure(qw(no_getopt_compat));
-    $parser->getoptionsfromarray($options, map {m!^(\w+)!; $_ => \$data->{$1}} @_);
+    $parser->getoptionsfromarray($args, map {m!^(\w+)!; $_ => \$data->{$1}} @$options);
     return Exclus::Data->new(data => $data);
 }
 
