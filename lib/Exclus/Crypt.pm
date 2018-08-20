@@ -14,8 +14,8 @@ use Exclus::Exclus;
 use Crypt::Misc qw(decode_b64 encode_b64);
 use Crypt::Mode::CBC;
 use Exporter qw(import);
-use String::Random;
 use Exclus::Environment;
+use Exclus::Util qw(generate_string);
 
 our @EXPORT_OK = qw(decrypt encrypt);
 
@@ -26,7 +26,7 @@ our @EXPORT_OK = qw(decrypt encrypt);
 #md_
 sub encrypt {
     my $string = shift;
-    my $iv = String::Random->new->randregex('.{16}');
+    my $iv = generate_string('.{16}');
     return encode_b64($iv . Crypt::Mode::CBC->new('AES')->encrypt($string, env()->{crypt_key}, $iv));
 }
 

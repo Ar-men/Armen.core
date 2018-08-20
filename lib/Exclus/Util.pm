@@ -14,19 +14,21 @@ use Exclus::Exclus;
 use Data::Dumper ();
 use Data::UUID ();
 use Exporter qw(import);
+use File::Spec::Functions qw(canonpath);
 use List::Util qw(min max);
 use Module::Runtime qw(use_module);
 use POSIX qw(strftime);
 use Ref::Util qw(is_ref is_hashref);
 use Scalar::Util qw(looks_like_number);
+use String::Random;
 use Term::Table;
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 
 our @EXPORT_OK = qw(
     $_call_if_can
-    trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef
-    dump_data  monkey_patch  key_value  plugin  deep_exists  ms_sleep t0 t0_ms_elapsed
-    to_priority format_table render_table
+    trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef dump_data
+    monkey_patch key_value plugin deep_exists ms_sleep t0 t0_ms_elapsed to_priority format_table
+    render_table generate_string build_path
 );
 
 #md_## Les méthodes
@@ -187,7 +189,18 @@ sub format_table {
 
 #md_### render_table()
 #md_
-sub render_table { return join("\n", format_table(@_)) }
+sub render_table { join("\n", format_table(@_)) }
+
+#md_### generate_string()
+#md_
+sub generate_string {
+    state $_generator = String::Random->new;
+    return $_generator->randregex(@_);
+}
+
+#md_### build_path()
+#md_
+sub build_path { canonpath(join('/', @_)) }
 
 1;
 __END__
