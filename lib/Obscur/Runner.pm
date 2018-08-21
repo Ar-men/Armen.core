@@ -123,8 +123,8 @@ sub who_i_am {
 #md_### load_object()
 #md_
 sub load_object {
-    my ($self, $package, $name, $cfg) = @_;
-    my ($object, $plugin_name) = plugin($package, $name, {runner => $self, cfg => $cfg});
+    my ($self, $package, $name, $cfg, %attributes) = @_;
+    my ($object, $plugin_name) = plugin($package, $name, {runner => $self, cfg => $cfg, %attributes});
     unless ($object->$_isa('Obscur::Object')) {
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
             message => "La valeur renvoyée par ce plugin n'hérite pas de 'Obscur::Object'",

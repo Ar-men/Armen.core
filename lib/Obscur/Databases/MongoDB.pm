@@ -37,5 +37,15 @@ has '_mongo' => (
 #md_
 sub get_collection { shift->_mongo->get_collection(@_) }
 
+#md_### find_one()
+#md_
+sub find_one {
+    my ($self, $collection, $filter) = @_;
+    my $document = $collection->find_one($filter);
+    return unless $document;
+    $document->{id} = delete $document->{_id};
+    return $document;
+}
+
 1;
 __END__
