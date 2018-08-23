@@ -51,13 +51,13 @@ has 'smtp_port' => (
 #md_### smtp_username
 #md_
 has 'smtp_username' => (
-    is => 'ro', isa => Maybe[Str], default => sub { undef }
+    is => 'ro', isa => Maybe[Str], default => sub { $_[0]->config->maybe_get_str(qw(smtp username)) }
 );
 
 #md_### smtp_password
 #md_
 has 'smtp_password' => (
-    is => 'ro', isa => Maybe[Str], default => sub { undef }
+    is => 'ro', isa => Maybe[Str], default => sub { $_[0]->config->maybe_get_str(qw(smtp password)) }
 );
 
 #md_### from
@@ -94,7 +94,7 @@ sub _body {
     my $node = $self->node;
     $timestamp = time_to_string($timestamp);
     my $body = <<END;
-<body style="background-color:LightGray;">
+<body style="color:black;background-color:gainsboro;">
 <pre><code>
  ___ _______ _  ___ ___
 / _ `/ __/  ' \\/ -_) _ \\
@@ -108,8 +108,8 @@ sub _body {
 <hr>
 $content
 <hr>
-<i>Powered By Archivage Numérique</i>
-<body>
+<p style="text-align:center;"><small>Powered By Archivage Num&eacute;rique</small></p>
+</body>
 END
 }
 
@@ -119,13 +119,14 @@ sub _create_email {
     my $self = shift;
     my $email = Email::Simple->create(
         header => [
-            From => $self->from
-        ,   To => $self->to
-        ,   Cc => $self->cc
-        ,   Subject => $self->subject
-        ,   'Content-Type' => 'text/html'
-        ]
-    ,   body => $self->_body(@_)
+            From => $self->from,
+            To => $self->to,
+            Cc => $self->cc,
+            Subject => $self->subject,
+            'Content-Type' => 'text/html',
+            'MIME-Version' => '1.0'
+        ],
+        body => $self->_body(@_)
     );
     return $email;
 }

@@ -3,6 +3,7 @@ requires 'namespace::clean';
 requires 'AnyEvent';
 requires 'AnyEvent::HTTP';
 requires 'AnyEvent::Timer::Cron';
+requires 'Authen::SASL';
 requires 'Authen::SCRAM';
 requires 'BSON::XS';
 requires 'Class::XSAccessor';
