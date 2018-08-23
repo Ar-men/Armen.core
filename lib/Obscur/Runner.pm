@@ -113,9 +113,16 @@ has '_resources' => (
 #md_
 sub get_short_id { substr($_[0]->id, 0, 8) }
 
-#md_### who_i_am()
+#md_### signature()
 #md_
-sub who_i_am {
+sub signature {
+    my ($self) = @_;
+    return $self->name . '[' . $self->id . ']';
+}
+
+#md_### properties()
+#md_
+sub properties {
     my ($self) = @_;
     return {id => $self->id, name => $self->name, node => $self->node_name};
 }

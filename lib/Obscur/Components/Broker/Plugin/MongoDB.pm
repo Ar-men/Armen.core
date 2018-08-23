@@ -76,7 +76,7 @@ sub publish {
     my ($self, $type, $priority, $data) = @_;
     my $message = Exclus::Message->new(
         type     => $type,
-        sender   => $self->runner->who_i_am,
+        sender   => $self->runner->properties,
         priority => $priority,
         payload  => $data
     );
