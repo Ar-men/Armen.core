@@ -87,14 +87,36 @@ has 'subject' => (
 #md_## Les méthodes
 #md_
 
-#md_### _body()
+#md_### _get_background_color()
 #md_
-sub _body {
-    my ($self, $content, $runner, $timestamp) = @_;
+sub _get_background_color {
+    state $_severities = {
+        E => 'IndianRed',
+        W => 'PeachPuff',
+        I => 'LightCyan'
+    };
+    my ($self, $severity) = @_;
+    return exists $_severities->{$severity} ? $_severities->{$severity} : 'Gainsboro';
+}
+
+#md_### _html()
+#md_
+sub _html {
+    my ($self, $severity, $content, $runner, $timestamp) = @_;
+    my $bg_color = $self->_get_background_color($severity);
+    my $title = $self->subject;
     my $node = $self->node;
     $timestamp = time_to_string($timestamp);
-    my $body = <<END;
-<body style="color:black;background-color:gainsboro;">
+###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
+    my $html = <<END;
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>armen</title>
+</head>
+<body style="color:black;">
 <pre><code>
  ___ _______ _  ___ ___
 / _ `/ __/  ' \\/ -_) _ \\
@@ -105,12 +127,18 @@ sub _body {
     <li>runner=$runner</li>
     <li>timestamp=$timestamp</li>
 </ul>
-<hr>
+<table border="0" cellpadding="20" cellspacing="0" width="100%" id="bodyTable" style="background-color:$bg_color;">
+<tr><td style="padding:20px;">
+<h3>$title</h3>
 $content
-<hr>
+</td></tr>
+</table>
 <p style="text-align:center;"><small>Powered By Archivage Num&eacute;rique</small></p>
 </body>
+</html>
 END
+###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
+    return $html;
 }
 
 #md_### _create_email()
@@ -126,7 +154,7 @@ sub _create_email {
             'Content-Type' => 'text/html',
             'MIME-Version' => '1.0'
         ],
-        body => $self->_body(@_)
+        body => $self->_html(@_)
     );
     return $email;
 }
