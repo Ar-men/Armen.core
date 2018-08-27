@@ -91,9 +91,9 @@ has 'subject' => (
 #md_
 sub _get_background_color {
     state $_severities = {
-        E => 'IndianRed',
-        W => 'PeachPuff',
-        I => 'LightCyan'
+        error   => 'IndianRed',
+        warning => 'PeachPuff',
+        info    => 'LightCyan'
     };
     my ($self, $severity) = @_;
     return exists $_severities->{$severity} ? $_severities->{$severity} : 'Gainsboro';

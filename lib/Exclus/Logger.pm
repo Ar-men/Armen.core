@@ -13,7 +13,7 @@ package Exclus::Logger;
 use Exclus::Exclus;
 use Moo;
 use Safe::Isa qw($_isa);
-use Types::Standard qw(HashRef InstanceOf Str);
+use Types::Standard qw(CodeRef HashRef InstanceOf Maybe Str);
 use Exclus::Config::Parser qw(parse);
 use Exclus::Exceptions;
 use Exclus::Semaphore;
@@ -49,6 +49,12 @@ has '_semaphore' => (
 #md_
 has '_outputs' => (
     is => 'ro', isa => HashRef, lazy => 1, default => sub { {} }, init_arg => undef
+);
+
+#md_### extra_cb
+#md_
+has 'extra_cb' => (
+    is => 'rw', isa => Maybe[CodeRef], clearer => 1, default => sub { undef }, init_arg => undef
 );
 
 #md_## Les méthodes
