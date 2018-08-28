@@ -18,7 +18,7 @@ use Moo;
 use Sys::Hostname::FQDN qw(fqdn);
 use Types::Standard qw(InstanceOf Int Maybe Str);
 use Exclus::Crypt qw(decrypt);
-use Exclus::Util qw(get_version time_to_string);
+use Exclus::Util qw(get_version template time_to_string);
 use namespace::clean;
 
 #md_## Les attributs
@@ -103,44 +103,20 @@ sub _get_background_color {
 #md_
 sub _html {
     my $_version = get_version('armen.core');
-    my ($self, $severity, $content, $runner, $timestamp) = @_;
-    my $bg_color = $self->_get_background_color($severity);
-    my $title = $self->subject;
-    my $node = $self->node;
-    $timestamp = time_to_string($timestamp);
-###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
-    my $html = <<END;
-<!doctype html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>armen</title>
-</head>
-<body style="color:black;">
-<pre><code>
- ___ _______ _  ___ ___
-/ _ `/ __/  ' \\/ -_) _ \\
-\\_,_/_/ /_/_/_/\\__/_//_/
-</code></pre>
-<ul>
-    <li>version=$_version</li>
-    <li>node=$node</li>
-    <li>runner=$runner</li>
-    <li>timestamp=$timestamp</li>
-</ul>
-<table border="0" cellpadding="20" cellspacing="0" width="100%" id="bodyTable" style="background-color:$bg_color;">
-<tr><td style="padding:20px;">
-<h3>$title</h3>
-$content
-</td></tr>
-</table>
-<p style="text-align:center;"><small>Powered By Archivage Num&eacute;rique</small></p>
-</body>
-</html>
-END
-###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
-    return $html;
+    my ($self, $severity, $runner, $content, $timestamp) = @_;
+    return template(
+        'armen.core',
+        'email',
+        {
+            version   => $_version,
+            node      => $self->node,
+            runner    => $runner,
+            timestamp => time_to_string($timestamp),
+            bg_color  => $self->_get_background_color($severity),
+            title     => $self->subject,
+            content   => $content
+        }
+    );
 }
 
 #md_### _create_email()

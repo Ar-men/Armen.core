@@ -22,6 +22,7 @@ use Ref::Util qw(is_ref is_hashref);
 use Scalar::Util qw(looks_like_number);
 use String::Random;
 use Term::Table;
+use Text::Caml;
 use Time::HiRes qw(gettimeofday tv_interval usleep);
 use YAML::XS qw(LoadFile);
 use Exclus::Environment;
@@ -30,7 +31,7 @@ our @EXPORT_OK = qw(
     $_call_if_can
     trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef dump_data
     monkey_patch key_value plugin deep_exists ms_sleep t0 t0_ms_elapsed to_priority format_table
-    render_table generate_string build_path root_path get_version
+    render_table generate_string build_path root_path get_version template
 );
 
 #md_## Les méthodes
@@ -212,8 +213,15 @@ sub root_path { build_path(env()->{root}, @_) }
 #md_
 sub get_version {
     my $data = LoadFile(root_path(@_, 'Version.yaml'));
-    return
-        exists $data->{version} ? $data->{version} : '0.0.0';
+    return exists $data->{version} ? $data->{version} : '0.0.0';
+}
+
+#md_### template()
+#md_
+sub template {
+    state $_mustache = Text::Caml->new;
+    my ($project, $file_name, $data) = @_;
+    return $_mustache->render_file(root_path($project, 'templates', "$file_name.mustache"), $data);
 }
 
 1;

@@ -13,11 +13,12 @@ package Exclus::Logger;
 use Exclus::Exclus;
 use Moo;
 use Safe::Isa qw($_isa);
+use Try::Tiny;
 use Types::Standard qw(CodeRef HashRef InstanceOf Maybe Str);
 use Exclus::Config::Parser qw(parse);
 use Exclus::Exceptions;
 use Exclus::Semaphore;
-use Exclus::Util qw(plugin);
+use Exclus::Util qw(plugin to_stderr);
 use namespace::clean;
 
 #md_## Les attributs
@@ -100,11 +101,16 @@ sub _cmp_level {
 #md_### log()
 #md_
 sub log {
-    my ($self, $level) = (shift, shift);
+    my ($self, $level, @args) = @_;
     my $release = $self->_semaphore->acquire_then_release; ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    foreach (values %{$self->_outputs}) {
-        $_->log($self, $level, @_)
-            if $self->_cmp_level($level, $_->level);
+    foreach my $output (values %{$self->_outputs}) {
+        try {
+            $output->log($self, $level, @args)
+                if $self->_cmp_level($level, $output->level);
+        }
+        catch {
+            to_stderr("$_");
+        };
     }
 }
 

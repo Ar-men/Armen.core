@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use List::Util qw(pairmap);
 use Moo;
 use Exclus::Email;
-use Exclus::Util qw(dump_data);
+use Exclus::Util qw(dump_data template);
 use namespace::clean;
 
 extends qw(Exclus::Logger::Plugin);
@@ -36,17 +36,22 @@ has '+level' => (
 sub log {
     my ($self, $logger, $level, $message, $attributes) = @_;
 ###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
-    my $content = "<p>$message</p>";
-    if ($attributes) {
-        $content .= '<ul>';
-        $content .= "<li>$_</li>" foreach pairmap {"$a=" . dump_data($b)} @$attributes;
-        $content .= '</ul>';
-    }
-###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
-    $content .= $logger->extra_cb->() if $logger->extra_cb;
     Exclus::Email
         ->new(config => $self->config, subject => ucfirst($level))
-        ->try_to_send($level, $content, sprintf('%s[%s]', $logger->runner_name, $logger->runner_data));
+        ->send(
+            $level,
+            sprintf('%s[%s]', $logger->runner_name, $logger->runner_data),
+            template(
+                'armen.core',
+                'logger',
+                {
+                    message    => $message,
+                    attributes => [pairmap {"$a=" . dump_data($b)} @$attributes],
+                    extra      => $logger->extra_cb ? $logger->extra_cb->() : undef
+                }
+            )
+        );
+###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
 }
 
 1;
