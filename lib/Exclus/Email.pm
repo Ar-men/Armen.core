@@ -18,7 +18,7 @@ use Moo;
 use Sys::Hostname::FQDN qw(fqdn);
 use Types::Standard qw(InstanceOf Int Maybe Str);
 use Exclus::Crypt qw(decrypt);
-use Exclus::Util qw(time_to_string);
+use Exclus::Util qw(get_version time_to_string);
 use namespace::clean;
 
 #md_## Les attributs
@@ -102,6 +102,7 @@ sub _get_background_color {
 #md_### _html()
 #md_
 sub _html {
+    my $_version = get_version('armen.core');
     my ($self, $severity, $content, $runner, $timestamp) = @_;
     my $bg_color = $self->_get_background_color($severity);
     my $title = $self->subject;
@@ -123,6 +124,7 @@ sub _html {
 \\_,_/_/ /_/_/_/\\__/_//_/
 </code></pre>
 <ul>
+    <li>version=$_version</li>
     <li>node=$node</li>
     <li>runner=$runner</li>
     <li>timestamp=$timestamp</li>

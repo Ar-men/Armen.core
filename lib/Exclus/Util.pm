@@ -79,7 +79,7 @@ sub create_uuid {
 
 #md_### time_to_string()
 #md_
-sub time_to_string { strftime('%Y.%m.%d %H:%M:%S', localtime($_[0] // time)) }
+sub time_to_string { strftime('%d.%m.%Y %H:%M:%S', localtime($_[0] // time)) }
 
 #md_### to_stderr()
 #md_
