@@ -18,6 +18,7 @@ our @EXPORT_OK = qw(add_environment);
 
 my $_g_environment = {};
 add_environment({
+    root      => '/opt/armen',
     crypt_key => '@1/]IfA>~Q:dO[armen]{#{6I\(Z,7n@',
     api_key   => 'lsm'
 });

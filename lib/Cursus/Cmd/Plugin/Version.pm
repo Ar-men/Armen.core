@@ -14,6 +14,7 @@ use Exclus::Exclus;
 use Moo;
 use Path::Iterator::Rule;
 use YAML::XS qw(LoadFile);
+use Exclus::Environment;
 use namespace::clean;
 
 extends qw(Cursus::Cmd::Plugin);
@@ -31,7 +32,7 @@ sub run {
     $rule->name('Version.yaml');
     $rule->min_depth(2);
     $rule->max_depth(2);
-    foreach ($rule->all($self->runner->dir->parent->stringify)) {
+    foreach ($rule->all(env()->{root})) {
         my $data = LoadFile($_);
         push @$rows, [$data->{project}, $data->{version}]
             if exists $data->{project} && exists $data->{version};

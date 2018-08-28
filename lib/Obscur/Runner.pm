@@ -12,7 +12,6 @@ package Obscur::Runner;
 
 use Exclus::Exclus;
 use Moo;
-use Path::Tiny qw(path);
 use Safe::Isa qw($_isa);
 use Sys::Hostname::FQDN qw(fqdn);
 use Types::Standard qw(HashRef InstanceOf Str);
@@ -30,12 +29,6 @@ use namespace::clean;
 #md_
 has 'id' => (
     is => 'ro', isa => Str, lazy => 1, default => sub { create_uuid() }
-);
-
-#md_### dir
-#md_
-has 'dir' => (
-    is => 'ro', isa => InstanceOf['Path::Tiny'], default => sub { path($0)->parent(2) }, init_arg => undef
 );
 
 #md_### name

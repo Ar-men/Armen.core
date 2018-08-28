@@ -23,12 +23,13 @@ use Scalar::Util qw(looks_like_number);
 use String::Random;
 use Term::Table;
 use Time::HiRes qw(gettimeofday tv_interval usleep);
+use Exclus::Environment;
 
 our @EXPORT_OK = qw(
     $_call_if_can
     trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef dump_data
     monkey_patch key_value plugin deep_exists ms_sleep t0 t0_ms_elapsed to_priority format_table
-    render_table generate_string build_path
+    render_table generate_string build_path root_path
 );
 
 #md_## Les méthodes
@@ -201,6 +202,10 @@ sub generate_string {
 #md_### build_path()
 #md_
 sub build_path { canonpath(join('/', @_)) }
+
+#md_### root_path()
+#md_
+sub root_path { build_path(env()->{root}, @_) }
 
 1;
 __END__
