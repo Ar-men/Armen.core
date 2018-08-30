@@ -35,11 +35,12 @@ has '+level' => (
 #md_
 sub log {
     my ($self, $logger, $level, $message, $attributes) = @_;
+    my $severity = $level eq 'err' ? 'error' : $level;
 ###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
     Exclus::Email
-        ->new(config => $self->config, subject => ucfirst($level))
+        ->new(config => $self->config, subject => ucfirst($severity))
         ->send(
-            $level,
+            $severity,
             sprintf('%s[%s]', $logger->runner_name, $logger->runner_data),
             template(
                 'armen.core',

@@ -29,9 +29,10 @@ use Exclus::Environment;
 
 our @EXPORT_OK = qw(
     $_call_if_can
-    trim_left trim_right clean_string create_uuid time_to_string to_stderr maybe_undef dump_data
-    monkey_patch key_value plugin deep_exists ms_sleep t0 t0_ms_elapsed to_priority format_table
-    render_table generate_string build_path root_path get_version template
+    trim_left  trim_right clean_string create_uuid time_to_string to_stderr maybe_undef  dump_data
+    monkey_patch key_value plugin  deep_exists ms_sleep t0  t0_ms_elapsed to_priority format_table
+    render_table generate_string build_path root_path get_basename replace_extension get_file_name
+    get_version template
 );
 
 #md_## Les méthodes
@@ -208,6 +209,29 @@ sub build_path { canonpath(join('/', @_)) }
 #md_### root_path()
 #md_
 sub root_path { build_path(env()->{root}, @_) }
+
+#md_### get_basename()
+#md_
+sub get_basename {
+    my ($file_name) = @_;
+    my ($basename) = $file_name =~ m!^(\S+)\.[^.]+$!;
+    return $basename;
+}
+
+#md_### replace_extension()
+#md_
+sub replace_extension {
+    my ($file_name, $extension) = @_;
+    return get_basename($file_name) . ".$extension";
+}
+
+#md_### get_file_name()
+#md_
+sub get_file_name {
+    my ($path_file) = @_;
+    my ($file_name) = $path_file =~ m!([^\/]+)$!;
+    return $file_name;
+}
 
 #md_### get_version()
 #md_
