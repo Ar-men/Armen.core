@@ -36,6 +36,10 @@ has 'nodes_or_clusters' => (
 #md_
 sub is_cluster { 1 }
 
+#md_### server()
+#md_
+sub server { ${shuffle values %{$_[0]->nodes_or_clusters}}[0]->server }
+
 #md_### _connect()
 #md_
 sub _connect {
