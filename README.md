@@ -13,6 +13,9 @@ La librairie générale
 ## Jargon
 Le client version ligne de commande
 
+## Lucide
+Le µs chargé du monitoring
+
 ## Obscur
 La librairie commune aux µs
 

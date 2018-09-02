@@ -1,0 +1,26 @@
+<ul>
+    <li>state:&nbsp;<strong>{{state}}</strong></li>
+    <li>previous state:&nbsp;{{previous_state}}</li>
+</ul>
+<ul>
+    <li>value:&nbsp;<strong>{{value}}</strong></li>
+    <li>previous value:&nbsp;{{previous_value}}</li>
+</ul>
+<p>warning:</p>
+<ul>
+    {{#warning}}
+      <li>{{.}}</li>
+    {{/warning}}
+</ul>
+<p>error:</p>
+<ul>
+    {{#error}}
+      <li>{{.}}</li>
+    {{/error}}
+</ul>
+<p>undefined:</p>
+<ul>
+    {{#undefined}}
+      <li>{{.}}</li>
+    {{/undefined}}
+</ul>

@@ -20,18 +20,22 @@ extends qw(Obscur::Databases::MongoDB);
 #md_## Les attributs
 #md_
 
-#md_### _config
+#md_### _systems
 #md_
-has '_config' => (
+has '_systems' => (
     is => 'ro',
     isa => InstanceOf['MongoDB::Collection'],
     lazy => 1,
-    default => sub { $_[0]->get_collection(qw(armen_Lucide buckets)) },
+    default => sub { $_[0]->get_collection(qw(armen_Lucide systems)) },
     init_arg => undef
 );
 
 #md_## Les méthodes
 #md_
+
+#md_### get_all_systems()
+#md_
+sub get_all_systems { map {$_->{label} = delete $_->{_id}; $_} $_[0]->_systems->find({})->all }
 
 1;
 __END__

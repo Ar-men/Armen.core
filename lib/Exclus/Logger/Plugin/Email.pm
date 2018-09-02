@@ -35,7 +35,7 @@ has '+level' => (
 #md_
 sub log {
     my ($self, $logger, $level, $message, $attributes) = @_;
-    my $severity = $level eq 'err' ? 'error' : $level;
+    my $severity = $level eq 'err' ? 'error' : $level eq 'crit' ? 'critical' : $level;
 ###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
     Exclus::Email
         ->new(config => $self->config, subject => ucfirst($severity))
