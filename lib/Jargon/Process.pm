@@ -5,9 +5,9 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Cursus::Process;
+package Jargon::Process;
 
-#md_# Cursus::Process
+#md_# Jargon::Process
 #md_
 
 use Exclus::Exclus;
@@ -24,7 +24,7 @@ extends qw(Obscur::Runner::Process);
 #md_
 
 ###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
-has '+name'        => (default => sub { 'Cursus' });
+has '+name'        => (default => sub { 'Jargon' });
 has '+description' => (default => sub { "Le client version ligne de commande" });
 ###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###
 
@@ -47,7 +47,7 @@ sub _help {
     my $self = shift;
     pod2usage(
         -exitval => 'NOEXIT',
-        -input   => pod_where({-inc => 1}, @_ ? sprintf('Cursus::Cmd::Plugin::%s', ucfirst($_[0])) : __PACKAGE__),
+        -input   => pod_where({-inc => 1}, @_ ? sprintf('Jargon::Cmd::Plugin::%s', ucfirst($_[0])) : __PACKAGE__),
         -verbose => 2
     );
 }
@@ -61,7 +61,7 @@ sub run {
     if ($cmd eq 'help') { $self->_help(@ARGV) }
     else {
         try {
-            plugin('Cursus::Cmd', ucfirst($cmd), {runner => $self})->run(@ARGV);
+            plugin('Jargon::Cmd', ucfirst($cmd), {runner => $self})->run(@ARGV);
         }
         catch {
             to_stderr($_);

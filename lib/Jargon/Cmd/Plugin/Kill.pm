@@ -5,17 +5,16 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Cursus::Cmd::Plugin::Encrypt;
+package Jargon::Cmd::Plugin::Kill;
 
-#md_# Cursus::Cmd::Plugin::Encrypt
+#md_# Jargon::Cmd::Plugin::Kill
 #md_
 
 use Exclus::Exclus;
 use Moo;
-use Exclus::Crypt qw(encrypt);
 use namespace::clean;
 
-extends qw(Cursus::Cmd::Plugin);
+extends qw(Jargon::Cmd::Plugin);
 
 #md_## Les méthodes
 #md_
@@ -23,8 +22,7 @@ extends qw(Cursus::Cmd::Plugin);
 #md_### run()
 #md_
 sub run {
-    my ($self, $string) = @_;
-    printf("$string ---> %s\n", encrypt($string));
+    my ($self) = @_;
 }
 
 1;
@@ -34,10 +32,10 @@ __END__
 
 =head1 Commande:
 
-    armen encrypt <string>
+    armen kill <µs.id>
 
 =head1 Description:
 
-    Crypter une chaine de caractères
+    Tuer le µs spécifié par son identifiant
 
 =cut

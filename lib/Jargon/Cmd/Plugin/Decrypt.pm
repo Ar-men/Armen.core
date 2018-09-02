@@ -5,16 +5,17 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Cursus::Cmd::Plugin::Kill;
+package Jargon::Cmd::Plugin::Decrypt;
 
-#md_# Cursus::Cmd::Plugin::Kill
+#md_# Jargon::Cmd::Plugin::Decrypt
 #md_
 
 use Exclus::Exclus;
 use Moo;
+use Exclus::Crypt qw(decrypt);
 use namespace::clean;
 
-extends qw(Cursus::Cmd::Plugin);
+extends qw(Jargon::Cmd::Plugin);
 
 #md_## Les méthodes
 #md_
@@ -22,7 +23,8 @@ extends qw(Cursus::Cmd::Plugin);
 #md_### run()
 #md_
 sub run {
-    my ($self) = @_;
+    my ($self, $string) = @_;
+    printf("$string ---> %s\n", decrypt($string));
 }
 
 1;
@@ -32,10 +34,10 @@ __END__
 
 =head1 Commande:
 
-    armen kill <µs.id>
+    armen decrypt <string>
 
 =head1 Description:
 
-    Tuer le µs spécifié par son identifiant
+    Décrypter une chaine préalablement cryptée
 
 =cut

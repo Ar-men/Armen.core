@@ -5,17 +5,17 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Cursus::Cmd::Plugin::Decrypt;
+package Jargon::Cmd::Plugin::Encrypt;
 
-#md_# Cursus::Cmd::Plugin::Decrypt
+#md_# Jargon::Cmd::Plugin::Encrypt
 #md_
 
 use Exclus::Exclus;
 use Moo;
-use Exclus::Crypt qw(decrypt);
+use Exclus::Crypt qw(encrypt);
 use namespace::clean;
 
-extends qw(Cursus::Cmd::Plugin);
+extends qw(Jargon::Cmd::Plugin);
 
 #md_## Les méthodes
 #md_
@@ -24,7 +24,7 @@ extends qw(Cursus::Cmd::Plugin);
 #md_
 sub run {
     my ($self, $string) = @_;
-    printf("$string ---> %s\n", decrypt($string));
+    printf("$string ---> %s\n", encrypt($string));
 }
 
 1;
@@ -34,10 +34,10 @@ __END__
 
 =head1 Commande:
 
-    armen decrypt <string>
+    armen encrypt <string>
 
 =head1 Description:
 
-    Décrypter une chaine préalablement cryptée
+    Crypter une chaine de caractères
 
 =cut

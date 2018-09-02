@@ -5,9 +5,9 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Cursus::Cmd::Plugin::Version;
+package Jargon::Cmd::Plugin::Version;
 
-#md_# Cursus::Cmd::Plugin::Version
+#md_# Jargon::Cmd::Plugin::Version
 #md_
 
 use Exclus::Exclus;
@@ -17,7 +17,7 @@ use YAML::XS qw(LoadFile);
 use Exclus::Environment;
 use namespace::clean;
 
-extends qw(Cursus::Cmd::Plugin);
+extends qw(Jargon::Cmd::Plugin);
 
 #md_## Les méthodes
 #md_

@@ -7,7 +7,7 @@
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
 use Exclus::Exclus;
-use Cursus::Process;
+use Jargon::Process;
 
 #md_## Les méthodes
 #md_
@@ -15,7 +15,7 @@ use Cursus::Process;
 #md_### _run_process()
 #md_
 sub _run_process {
-    Cursus::Process->new->process;
+    Jargon::Process->new->process;
 }
 
 ###----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----###

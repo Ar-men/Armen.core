@@ -5,9 +5,9 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Cursus::Cmd::Plugin;
+package Jargon::Cmd::Plugin;
 
-#md_# Cursus::Cmd::Plugin
+#md_# Jargon::Cmd::Plugin
 #md_
 
 use Exclus::Exclus;

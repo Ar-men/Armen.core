@@ -4,14 +4,14 @@ Ecosystème basé sur les microservices
 ## Blocus
 Le µs "gatekeeper"
 
-## Cursus
-Le client version ligne de commande
-
 ## Diktat
 Le µs chargé de générer des évènements
 
 ## Exclus
 La librairie générale
+
+## Jargon
+Le client version ligne de commande
 
 ## Obscur
 La librairie commune aux µs

@@ -5,16 +5,16 @@
 ##
 ####### Ecosystème basé sur les microservices ##################### (c) 2018 losyme ####### @(°_°)@
 
-package Cursus::Cmd::Plugin::Start;
+package Jargon::Cmd::Plugin::Start;
 
-#md_# Cursus::Cmd::Plugin::Start
+#md_# Jargon::Cmd::Plugin::Start
 #md_
 
 use Exclus::Exclus;
 use Moo;
 use namespace::clean;
 
-extends qw(Cursus::Cmd::Plugin);
+extends qw(Jargon::Cmd::Plugin);
 
 #md_## Les méthodes
 #md_
