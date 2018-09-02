@@ -16,7 +16,7 @@ use AnyEvent::Timer::Cron;
 use DateTime::TimeZone::Local;
 use Moo;
 use Try::Tiny;
-use Types::Standard qw(HashRef);
+use Types::Standard -types;
 use namespace::clean;
 
 extends qw(Obscur::Object);

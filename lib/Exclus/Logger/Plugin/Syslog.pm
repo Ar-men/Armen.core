@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use List::Util qw(pairmap);
 use Moo;
 use Sys::Syslog ();
-use Types::Standard qw(Str);
+use Types::Standard -types;
 use Exclus::Util qw(clean_string dump_data);
 use namespace::clean;
 

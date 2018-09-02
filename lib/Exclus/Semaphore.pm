@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use Guard qw(guard);
 use IPC::SysV qw(S_IRUSR S_IWUSR IPC_CREAT SETVAL);
 use Moo;
-use Types::Standard qw(Int);
+use Types::Standard -types;
 use Exclus::Exceptions;
 use namespace::clean;
 

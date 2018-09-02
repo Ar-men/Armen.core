@@ -12,7 +12,7 @@ package Exclus::Config::Plugin::File;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(Str);
+use Types::Standard -types;
 use YAML::XS qw(LoadFile);
 use namespace::clean;
 

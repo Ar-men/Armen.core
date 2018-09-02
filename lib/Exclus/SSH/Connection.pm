@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use Moo;
 use Net::OpenSSH::Constants qw(:error);
 use Ref::Util qw(is_hashref);
-use Types::Standard qw(InstanceOf);
+use Types::Standard -types;
 use Exclus::Exceptions;
 use namespace::clean;
 

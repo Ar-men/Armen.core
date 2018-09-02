@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use HTTP::Tiny;
 use JSON::MaybeXS qw(decode_json encode_json);
 use Moo;
-use Types::Standard qw(HashRef InstanceOf Int);
+use Types::Standard -types;
 use Exclus::Exceptions;
 use namespace::clean;
 

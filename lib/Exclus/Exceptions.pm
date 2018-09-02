@@ -42,7 +42,7 @@ use Moo;
 use Ref::Util qw(is_hashref);
 use Safe::Isa qw($_isa);
 use Try::Tiny;
-use Types::Standard qw(ArrayRef HashRef Str);
+use Types::Standard -types;
 use Exclus::Util qw(clean_string dump_data);
 use namespace::clean;
 

@@ -16,7 +16,7 @@ use Plack::Builder;
 use Router::Boom::Method;
 use Try::Tiny;
 use Twiggy::Server;
-use Types::Standard qw(InstanceOf);
+use Types::Standard -types;
 use Exclus::Util qw($_call_if_can);
 use namespace::clean;
 
@@ -122,7 +122,7 @@ use JSON::MaybeXS qw(decode_json encode_json);
 use Moo;
 use Plack::Request;
 use Plack::Response;
-use Types::Standard qw(ArrayRef Bool HashRef InstanceOf Str);
+use Types::Standard -types;
 use XML::Hash::XS qw(hash2xml xml2hash);
 use Exclus::Data;
 use Exclus::Exceptions;

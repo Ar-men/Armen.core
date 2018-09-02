@@ -16,7 +16,7 @@ use Email::Sender::Simple qw(sendmail try_to_sendmail);
 use Email::Sender::Transport::SMTP;
 use Moo;
 use Sys::Hostname::FQDN qw(fqdn);
-use Types::Standard qw(InstanceOf Int Maybe Str);
+use Types::Standard -types;
 use Exclus::Crypt qw(decrypt);
 use Exclus::Util qw(get_version template time_to_string);
 use namespace::clean;

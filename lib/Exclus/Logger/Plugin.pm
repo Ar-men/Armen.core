@@ -12,7 +12,7 @@ package Exclus::Logger::Plugin;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(InstanceOf Str);
+use Types::Standard -types;
 use namespace::clean;
 
 #md_## Les attributs

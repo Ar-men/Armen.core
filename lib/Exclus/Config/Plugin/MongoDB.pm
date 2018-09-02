@@ -12,7 +12,7 @@ package Exclus::Config::Plugin::MongoDB;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(Str);
+use Types::Standard -types;
 use Exclus::Databases::MongoDB;
 use Exclus::Exceptions;
 use namespace::clean;

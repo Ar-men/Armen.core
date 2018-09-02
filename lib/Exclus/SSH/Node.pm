@@ -15,7 +15,7 @@ use Moo;
 use Net::OpenSSH;
 use Ref::Util qw(is_hashref);
 use Try::Tiny;
-use Types::Standard qw(HashRef Int Str);
+use Types::Standard -types;
 use Exclus::Crypt qw(decrypt);
 use Exclus::Exceptions;
 use Exclus::SSH::Connection;

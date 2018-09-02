@@ -12,7 +12,7 @@ package Exclus::SSH::Base;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(Str);
+use Types::Standard -types;
 use namespace::clean;
 
 #md_## Les attributs

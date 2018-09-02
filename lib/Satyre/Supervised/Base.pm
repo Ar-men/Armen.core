@@ -12,7 +12,7 @@ package Satyre::Supervised::Base;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(Int Str Maybe);
+use Types::Standard -types;
 use namespace::clean;
 
 extends qw(Obscur::Context);

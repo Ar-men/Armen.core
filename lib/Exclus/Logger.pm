@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use Moo;
 use Safe::Isa qw($_isa);
 use Try::Tiny;
-use Types::Standard qw(CodeRef HashRef InstanceOf Maybe Str);
+use Types::Standard -types;
 use Exclus::Config::Parser qw(parse);
 use Exclus::Exceptions;
 use Exclus::Semaphore;

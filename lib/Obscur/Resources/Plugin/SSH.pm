@@ -12,7 +12,7 @@ package Obscur::Resources::Plugin::SSH;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(ArrayRef Str);
+use Types::Standard -types;
 use Exclus::Exceptions;
 use Exclus::SSH::Cluster;
 use Exclus::SSH::Node;

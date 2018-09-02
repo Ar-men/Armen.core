@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use MongoDB;
 use Moo;
 use Ref::Util qw(is_hashref);
-use Types::Standard qw(HashRef InstanceOf Maybe Str);
+use Types::Standard -types;
 use Exclus::Crypt qw(decrypt);
 use namespace::clean;
 

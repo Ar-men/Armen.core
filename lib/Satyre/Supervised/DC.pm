@@ -13,7 +13,7 @@ package Satyre::Supervised::DC;
 use Exclus::Exclus;
 use List::Util qw(shuffle);
 use Moo;
-use Types::Standard qw(HashRef InstanceOf);
+use Types::Standard -types;
 use Satyre::Supervised::Node;
 use namespace::clean;
 

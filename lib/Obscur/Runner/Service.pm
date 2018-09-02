@@ -16,7 +16,7 @@ use AnyEvent;
 use Guard qw(scope_guard);
 use Moo;
 use Try::Tiny;
-use Types::Standard qw(Bool HashRef InstanceOf Int Str);
+use Types::Standard -types;
 use Exclus::Environment;
 use Exclus::Exceptions;
 use Exclus::Util qw($_call_if_can dump_data key_value);

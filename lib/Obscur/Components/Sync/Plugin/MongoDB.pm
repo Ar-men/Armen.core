@@ -16,7 +16,7 @@ use Guard qw(guard);
 use Moo;
 use Safe::Isa qw($_isa);
 use Try::Tiny;
-use Types::Standard qw(InstanceOf);
+use Types::Standard -types;
 use Exclus::Exceptions qw(Sync::UnableToLock);
 use Exclus::Util qw(ms_sleep t0 t0_ms_elapsed);
 use namespace::clean;

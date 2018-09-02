@@ -15,7 +15,7 @@ use List::Util qw(shuffle);
 use Moo;
 use Safe::Isa qw($_isa);
 use Try::Tiny;
-use Types::Standard qw(InstanceOf);
+use Types::Standard -types;
 use Exclus::Exceptions;
 use namespace::clean;
 

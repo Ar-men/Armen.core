@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use List::Util qw(shuffle);
 use Moo;
 use Ref::Util qw(is_coderef is_hashref);
-use Types::Standard qw(ArrayRef Bool HashRef Int Maybe Num Str);
+use Types::Standard -types;
 use Exclus::Exceptions;
 use Exclus::Util qw(deep_exists monkey_patch);
 use namespace::clean;

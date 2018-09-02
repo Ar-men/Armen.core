@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use List::Util qw(shuffle);
 use Moo;
 use Try::Tiny;
-use Types::Standard qw(HashRef InstanceOf);
+use Types::Standard -types;
 use Exclus::Exceptions;
 use namespace::clean;
 

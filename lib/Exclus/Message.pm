@@ -13,7 +13,7 @@ package Exclus::Message;
 use Exclus::Exclus;
 use JSON::MaybeXS;
 use Moo;
-use Types::Standard qw(ArrayRef Bool HashRef Int Maybe Num Str);
+use Types::Standard -types;
 use Exclus::Util qw(create_uuid to_priority);
 use namespace::clean;
 

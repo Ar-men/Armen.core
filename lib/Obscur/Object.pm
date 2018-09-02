@@ -12,7 +12,7 @@ package Obscur::Object;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(Bool HashRef InstanceOf);
+use Types::Standard -types;
 use Exclus::Data;
 use namespace::clean;
 

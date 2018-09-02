@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use Moo;
 use Safe::Isa qw($_isa);
 use Sys::Hostname::FQDN qw(fqdn);
-use Types::Standard qw(HashRef InstanceOf Str);
+use Types::Standard -types;
 use Exclus::Config;
 use Exclus::Data;
 use Exclus::Exceptions;

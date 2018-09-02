@@ -14,7 +14,7 @@ use Exclus::Exclus;
 use AnyEvent;
 use Moo;
 use Try::Tiny;
-use Types::Standard qw(ArrayRef HashRef InstanceOf Str);
+use Types::Standard -types;
 use Exclus::Data;
 use Exclus::Exceptions;
 use Exclus::Message;

@@ -12,7 +12,7 @@ package Obscur::Context;
 
 use Exclus::Exclus;
 use Moo;
-use Types::Standard qw(InstanceOf);
+use Types::Standard -types;
 use namespace::clean;
 
 #md_## Les attributs

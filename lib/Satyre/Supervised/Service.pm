@@ -13,7 +13,7 @@ package Satyre::Supervised::Service;
 use Exclus::Exclus;
 use List::Util qw(shuffle);
 use Moo;
-use Types::Standard qw(HashRef InstanceOf Int Maybe);
+use Types::Standard -types;
 use Satyre::Supervised::DC;
 use namespace::clean;
 
