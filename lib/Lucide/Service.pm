@@ -90,21 +90,31 @@ sub _get_application {
     return $app;
 }
 
-#md_### _build_do_system()
+#md_### _build_composed_system()
 #md_
-sub _build_do_system {
-    my ($self, $system, $do) = @_;
-    my ($app_name, $method, @args) = split(' ', $do->get_str('cmd'));
+sub _build_composed_system {
+    my ($self, $system, $list, @labels) = @_;
+    $system->{state} = 'uninitialized';
+    $system->{systems} = [];
+    push @{$system->{systems}}, $self->_build_one_system(Exclus::Data->new(data => $_), @labels)
+        foreach @$list;
+}
+
+#md_### _build_resource_system()
+#md_
+sub _build_resource_system {
+    my ($self, $system, $resource) = @_;
+    my ($app_name, $method, @args) = split(' ', $resource->get_str('cmd'));
     my $app = $self->_get_application($app_name, $method);
     return unless $app;
-    $system->{type}   = 'value';
     $system->{app}    = $app;
     $system->{method} = $method;
     $system->{args}   = [@args];
     $system->{value}  = 'uninitialized';
     $system->{state}  = 'uninitialized';
-    $self->scheduler->add_cron(
-        $do->get_str('at'),
+    $self->scheduler->add_timer(
+        int(rand(10) + 1),
+        $resource->get_str('repeat'),
         sub {
             $self->_monitor($system);
         },
@@ -119,20 +129,21 @@ sub _build_one_system {
     my $label = $cfg->get_str('label');
     my $name = join('.', @labels, $label);
     my $system = {name => $name};
-    if (my $and = $cfg->maybe_get_arrayref('and')) {
-        $system->{type}    = 'and';
-        $system->{systems} = [];
-        push @{$system->{systems}}, $self->_build_one_system(Exclus::Data->new(data => $_), @labels, $label)
-            foreach @$and;
+    if ($cfg->get_bool({delault => 0}, 'disabled')) {
+        $system->{type} = 'disabled';
+        $self->info('Disabled', [system => $name]);
+    }
+    elsif (my $and = $cfg->maybe_get_arrayref('and')) {
+        $system->{type} = 'and';
+        $self->_build_composed_system($system, $and, @labels, $label);
     }
     elsif (my $or = $cfg->maybe_get_arrayref('or')) {
-        $system->{type}    = 'or';
-        $system->{systems} = [];
-        push @{$system->{systems}}, $self->_build_one_system(Exclus::Data->new(data => $_), @labels, $label)
-            foreach @$or;
+        $system->{type} = 'or';
+        $self->_build_composed_system($system, $or, @labels, $label);
     }
-    elsif (my $do = $cfg->create({default => undef}, 'do')) {
-        $self->_build_do_system($system, $do);
+    elsif (my $resource = $cfg->create({default => undef}, 'resource')) {
+        $system->{type} = 'resource';
+        $self->_build_resource_system($system, $resource);
     }
     else {
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,6 +151,7 @@ sub _build_one_system {
             params  => [system => $name]
         });
     }
+    return $system;
 }
 
 #md_### _build__all_systems()
@@ -158,13 +170,22 @@ sub _build__all_systems {
 #md_
 sub _execute_cmd {
     my ($self, $system) = @_;
-    my ($value, $state) = try {
+    my ($value, $state);
+    try {
+        local $SIG{ALRM} = sub {
+            EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
+                message => "Timeout lors du test de cette ressource système",
+                params  => [resource => $system->{name}]
+            });
+        };
         my $method = $system->{method};
-        return $system->{app}->$method(@{$system->{args}});
+        alarm 10;
+        ($value, $state) = $system->{app}->$method(@{$system->{args}});
+        alarm 0;
     }
     catch {
+        ($value, $state) = ('undefined', 'undefined');
         $self->error("$_");
-        return ('undefined', 'undefined');
     };
     # Stringification de la valeur en prévision de la comparaison avec la valeur précédente
     return ("$value", $state);
@@ -196,7 +217,7 @@ sub _monitor {
         Exclus::Email
             ->new(config => $self->config, subject => $system_name)
             ->try_to_send(
-                $state eq 'undefined' ? 'error' : $state,
+                $state,
                 $self->signature,
                 template(
                     'armen.core',
