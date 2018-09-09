@@ -21,16 +21,9 @@ extends qw(Obscur::Resources::Plugin);
 #md_## Les méthodes
 #md_
 
-#md_### _get_options()
+#md_### _set_auth()
 #md_
-sub _get_options {
-    my ($self) = @_;
-    return $self->cfg->get_hashref({default => {}}, 'options');
-}
-
-#md_### _get_auth()
-#md_
-sub _get_auth {
+sub _set_auth {
     my ($self, $options) = @_;
     my $auth = $self->cfg->create({default => {}}, 'auth');
     my $db_name = $auth->maybe_get_str('db_name');
@@ -49,9 +42,10 @@ sub _get_auth {
 #md_
 sub build_resource {
     my ($self, $runner, $name) = @_;
+    my $cfg = $self->cfg;
     return Exclus::Databases::MongoDB->new(
-        host    => 'mongodb://' . join(',', @{$self->cfg->get_arrayref('servers')}),
-        options => $self->_get_auth($self->_get_options)
+        host    =>      'mongodb://' . join(',', @{$cfg->get_arrayref('servers')}),
+        options => $self->_set_auth($cfg->get_hashref({default => {}}, 'options'))
     )
 }
 

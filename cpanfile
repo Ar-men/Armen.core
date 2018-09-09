@@ -12,6 +12,7 @@ requires 'CryptX';
 requires 'Data::UUID';
 requires 'Data::Visitor::Tiny';
 requires 'DateTime::TimeZone';
+requires 'DBI';
 requires 'Email::Sender';
 requires 'EV';
 requires 'Guard';
