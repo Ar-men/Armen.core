@@ -21,20 +21,10 @@ use Exclus::Exceptions qw(Sync::UnableToLock);
 use Exclus::Util qw(ms_sleep t0 t0_ms_elapsed);
 use namespace::clean;
 
-extends qw(Obscur::Object);
+extends qw(Obscur::Databases::MongoDB);
 
 #md_## Les attributs
 #md_
-
-#md_### _mongo
-#md_
-has '_mongo' => (
-    is => 'ro',
-    isa => InstanceOf['Exclus::Databases::MongoDB'],
-    lazy => 1,
-    default => sub { $_[0]->runner->build_resource('MongoDB', $_[0]->cfg) },
-    init_arg => undef
-);
 
 #md_### _sync
 #md_
@@ -42,7 +32,7 @@ has '_sync' => (
     is => 'ro',
     isa => InstanceOf['MongoDB::Collection'],
     lazy => 1,
-    default => sub { $_[0]->_mongo->get_collection(qw(armen sync)) },
+    default => sub { $_[0]->get_collection(qw(armen sync)) },
     init_arg => undef
 );
 

@@ -20,20 +20,10 @@ use Exclus::Exceptions;
 use Exclus::Message;
 use namespace::clean;
 
-extends qw(Obscur::Object);
+extends qw(Obscur::Databases::MongoDB);
 
 #md_## Les attributs
 #md_
-
-#md_### _mongo
-#md_
-has '_mongo' => (
-    is => 'ro',
-    isa => InstanceOf['Exclus::Databases::MongoDB'],
-    lazy => 1,
-    default => sub { $_[0]->runner->build_resource('MongoDB', $_[0]->cfg) },
-    init_arg => undef
-);
 
 #md_### _broker
 #md_
@@ -41,7 +31,7 @@ has '_broker' => (
     is => 'ro',
     isa => InstanceOf['MongoDB::Collection'],
     lazy => 1,
-    default => sub { $_[0]->_mongo->get_collection(qw(armen broker)) },
+    default => sub { $_[0]->get_collection(qw(armen broker)) },
     init_arg => undef
 );
 
@@ -63,7 +53,7 @@ sub _build__bindings {
         my $cfg = Exclus::Data->new(data => $_);
         my $queue = $cfg->get_str('_id');
         $bindings->{$queue} = {
-            collection => $self->_mongo->get_collection('armen', "broker.queue.$queue"),
+            collection => $self->get_collection('armen', "broker.queue.$queue"),
             bindings   => $cfg->get({type => ArrayRef[Str]}, 'bindings')
         }
     }

@@ -11,7 +11,6 @@ package Lucide::Service;
 #md_
 
 use Exclus::Exclus;
-use Module::Runtime qw(use_module);
 use Moo;
 use Try::Tiny;
 use Types::Standard -types;
@@ -61,33 +60,7 @@ has '_all_states' => (
 sub _build__backend {
     my $self = shift;
     my $config = $self->cfg->create('backend');
-    return $self->load_object('Lucide::Backend', $config->get_str('use'), $config->create('cfg'));
-}
-
-#md_### _get_application()
-#md_
-sub _get_application {
-    state $_app = {};
-    my ($self, $name, $method) = @_;
-    unless (exists $_app->{$name}) {
-        my $app = $self->config->create({default => undef}, 'applications', $name);
-        unless ($app) {
-            EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
-                message => "Cette application n'existe pas",
-                params  => [application => $name]
-            });
-        }
-        return if $app->get_bool({default => 0}, 'disabled');
-        $_app->{$name} = use_module("Application::$name")->setup($self, $app->create({default => {}}, 'cfg'));
-    }
-    my $app = $_app->{$name};
-    unless ($app->can($method)) {
-        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
-            message => "Cette méthode n'est pas valide pour cette application",
-            params  => [application => $name, method => $method]
-        });
-    }
-    return $app;
+    return $self->load_plugin('Lucide::Backend', $config->get_str('use'), $config->create('cfg'));
 }
 
 #md_### _build_composed_system()
@@ -105,10 +78,9 @@ sub _build_composed_system {
 sub _build_resource_system {
     my ($self, $system, $resource) = @_;
     my ($app_name, $method, @args) = split(' ', $resource->get_str('cmd'));
-    my $app = $self->_get_application($app_name, $method);
-    return unless $app;
-    $system->{app}    = $app;
-    $system->{method} = $method;
+    my $method_ref = $self->get_application($app_name)->get_method_reference($method);
+    return unless $method_ref;
+    $system->{method} = $method_ref;
     $system->{args}   = [@args];
     $system->{value}  = 'uninitialized';
     $system->{state}  = 'uninitialized';
@@ -180,7 +152,7 @@ sub _execute_cmd {
         };
         my $method = $system->{method};
         alarm 10;
-        ($value, $state) = $system->{app}->$method(@{$system->{args}});
+        ($value, $state) = $system->{method}->($self, @{$system->{args}});
         alarm 0;
     }
     catch {

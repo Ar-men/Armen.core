@@ -20,6 +20,7 @@ use Exclus::Data;
 use Exclus::Exceptions;
 use Exclus::Logger;
 use Exclus::Util qw(create_uuid monkey_patch plugin);
+use Obscur::Application;
 use namespace::clean;
 
 #md_## Les attributs
@@ -99,6 +100,12 @@ has '_resources' => (
     is => 'ro', isa => HashRef, default => sub { {} }, init_arg => undef
 );
 
+#md_### _applications
+#md_
+has '_applications' => (
+    is => 'ro', isa => HashRef[InstanceOf['Obscur::Application']], default => sub { {} }, init_arg => undef
+);
+
 #md_## Les méthodes
 #md_
 
@@ -120,43 +127,40 @@ sub properties {
     return {id => $self->id, name => $self->name, node => $self->node_name};
 }
 
-#md_### load_object()
-#md_
-sub load_object {
-    my ($self, $package, $name, $cfg, %attributes) = @_;
-    my ($object, $plugin_name) = plugin($package, $name, {runner => $self, cfg => $cfg, %attributes});
-    unless ($object->$_isa('Obscur::Object')) {
-        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
-            message => "La valeur renvoyée par ce plugin n'hérite pas de 'Obscur::Object'",
-            params  => [plugin => $plugin_name]
-        });
-    }
-    return $object;
-}
-
 #md_### _build_component()
 #md_
 sub _build_component {
     my ($self, $name) = @_;
     my $component_config = $self->config->create('components', $name);
-    return $self->load_object(
+    return $self->load_plugin(
         'Obscur::Components::' . ucfirst $name,
         $component_config->get_str('use'),
         $component_config->create({default => {}}, 'cfg')
     );
 }
 
+#md_### load_plugin()
+#md_
+sub load_plugin {
+    my ($self, $package, $name, $cfg, %attributes) = @_;
+    my ($plugin, $plugin_name) = plugin($package, $name, {runner => $self, cfg => $cfg, %attributes});
+    unless ($plugin->$_isa('Obscur::Object')) {
+        EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
+            message => "La valeur renvoyée par ce plugin n'hérite pas de 'Obscur::Object'",
+            params  => [plugin => $plugin_name]
+        });
+    }
+    return $plugin;
+}
+
 #md_### build_resource()
 #md_
 sub build_resource {
     my ($self, $type, $cfg) = @_;
-    my $resource_name;
     my $resources = $self->_resources;
-    if ($cfg->exists('resource')) {
-        $resource_name = $cfg->get_str('resource');
-        return $resources->{$resource_name} if exists $resources->{$resource_name};
-        $cfg = $self->config->create('resources', $resource_name);
-    }
+    my $resource_name = $cfg->get_str('resource');
+    return $resources->{$resource_name} if exists $resources->{$resource_name};
+    $cfg = $self->config->create('resources', $resource_name);
     my ($plugin, $plugin_name) = plugin('Obscur::Resources', $type, {cfg => $cfg});
     unless ($plugin->$_isa('Obscur::Resources::Plugin')) {
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,8 +169,7 @@ sub build_resource {
         });
     }
     my $resource = $plugin->build_resource($self, $resource_name);
-    $resources->{$resource_name} = $resource
-        if $resource_name;
+    $resources->{$resource_name} = $resource;
     return $resource;
 }
 
@@ -179,6 +182,33 @@ sub get_resource {
         exists $resources->{$name}
             ? $resources->{$name}
             : $self->build_resource($type, Exclus::Data->new(data => {resource => $name}));
+}
+
+#md_### setup_application()
+#md_
+sub setup_application {
+    my ($self, $name) = @_;
+    my $applications = $self->_applications;
+    unless (exists $applications->{$name}) {
+        my $cfg = $self->config->create({default => undef}, 'applications', $name);
+        unless ($cfg) {
+            EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
+                message => "Cette application n'existe pas",
+                params  => [application => $name]
+            });
+        }
+        $applications->{$name} = Obscur::Application->new(runner => $self, cfg => $cfg, name => $name)->setup;
+    }
+    return $applications->{$name};
+}
+
+#md_### get_application()
+#md_
+sub get_application {
+    my ($self, $name) = @_;
+    my $applications = $self->_applications;
+    return
+        exists $applications->{$name} ? $applications->{$name} : $self->setup_application($name);
 }
 
 #md_### debug(), info(), notice(), warning(), error(), critical()
