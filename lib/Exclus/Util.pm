@@ -32,7 +32,7 @@ our @EXPORT_OK = qw(
     trim_left  trim_right clean_string create_uuid time_to_string to_stderr maybe_undef  dump_data
     monkey_patch key_value plugin  deep_exists ms_sleep t0  t0_ms_elapsed to_priority format_table
     render_table generate_string build_path root_path get_basename replace_extension get_file_name
-    get_version template
+    get_version template replace
 );
 
 #md_## Les méthodes
@@ -246,6 +246,18 @@ sub template {
     state $_mustache = Text::Caml->new;
     my ($project, $file_name, $data) = @_;
     return $_mustache->render_file(root_path($project, 'templates', "$file_name.mustache"), $data);
+}
+
+#md_### replace()
+#md_
+sub replace {
+    my ($expression, @args) = @_;
+    my $i = 1;
+    while (defined(my $value = shift(@args))) {
+        $expression =~ s/\($i\)/$value/g;
+        $i++;
+    }
+    return $expression;
 }
 
 1;
