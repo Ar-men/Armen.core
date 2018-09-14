@@ -36,7 +36,7 @@ sub _add_timer {
         $params->get_int({default => 0}, 'after'),
         $params->get_int({default => 0}, 'repeat'),
         sub {
-            $self->logger->debug('Emit timer event', [name => $name]);
+            $self->logger->info('Emit timer event', [name => $name]);
             $self->broker->publish($name, $priority, $data);
         },
         $name
@@ -50,7 +50,7 @@ sub _add_cron {
     $self->scheduler->add_cron(
         $params->get_str({default => '0 * * * *'}, 'cron'),
         sub {
-            $self->logger->debug('Emit cron event', [name => $name]);
+            $self->logger->info('Emit cron event', [name => $name]);
             $self->broker->publish($name, $priority, $data);
         },
         $name
