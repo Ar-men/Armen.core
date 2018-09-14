@@ -44,7 +44,7 @@ sub log {
             sprintf('%s[%s]', $logger->runner_name, $logger->runner_data),
             template(
                 'armen.core',
-                'logger',
+                'Exclus.Logger.Plugin.Email',
                 {
                     message    => $message,
                     attributes => [pairmap {"$a=" . dump_data($b)} @$attributes],

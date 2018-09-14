@@ -193,7 +193,7 @@ sub _monitor {
                 $self->signature,
                 template(
                     'armen.core',
-                    'monitor',
+                    'Lucide.Service',
                     {
                         value          => $value,
                         previous_value => $previous_value,

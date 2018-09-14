@@ -107,7 +107,7 @@ sub _html {
     my ($self, $severity, $runner, $content, $timestamp) = @_;
     return template(
         'armen.core',
-        'email',
+        'Exclus.Email',
         {
             version   => $_version,
             node      => $self->node,
