@@ -189,7 +189,7 @@ sub _monitor {
         Exclus::Email
             ->new(config => $self->config, subject => $system_name)
             ->try_to_send(
-                $state,
+                $state, #TODO: à remplacer par l'état général ?
                 $self->signature,
                 template(
                     'armen.core',
