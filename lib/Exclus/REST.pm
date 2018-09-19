@@ -72,8 +72,7 @@ sub send_json {
 sub request {
     my $self = shift;
     my $response = $self->_client->request(@_, $self->_options);
-    return
-        $response->{success}, $response;
+    return $response->{success}, $response;
 }
 
 #md_### get_content()
