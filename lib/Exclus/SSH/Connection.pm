@@ -58,7 +58,7 @@ sub _sudo {
 sub _debug {
     my ($self, $cmd) = @_;
     my $ssh = $self->ssh;
-    $self->logger->debug('SSH', [server => $ssh->get_host, username => $ssh->get_user, cmd => $cmd] );
+    $self->logger->debug('SSH', [server => $ssh->get_host, username => $ssh->get_user, cmd => $cmd]);
 }
 
 #md_### _throw_error()
@@ -150,6 +150,32 @@ sub compute_md5 {
         message => 'Cette valeur ne correspond pas à un md5',
         params  => [output => $output]
     });
+}
+
+#md_### scp_get()
+#md_
+sub scp_get {
+    my $self = shift;
+    my $opts = is_hashref($_[0]) ? shift : {};
+    my $destination = pop @_;
+    my @sources = @_;
+    my $ssh = $self->ssh;
+    $self->logger->debug(
+        'scp/get',
+        [server => $ssh->get_host, username => $ssh->get_user, sources => \@sources, destination => $destination]
+    );
+    unless ($ssh->scp_get($opts, @sources, $destination)) {
+        EX->throw( ##///////////////////////////////////////////////////////////////////////////////////////////////////
+            message => "Impossible d'effectuer le transfert (scp/get)",
+            params  => [
+                server      => $ssh->get_host,
+                username    => $ssh->get_user,
+                sources     => \@sources,
+                destination => $destination,
+                error       => $ssh->error
+            ]
+        );
+    }
 }
 
 1;
