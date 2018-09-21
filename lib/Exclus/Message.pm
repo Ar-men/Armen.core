@@ -62,6 +62,12 @@ has 'reserved' => (
     is => 'ro', isa => Bool, default => sub { 0 }
 );
 
+#md_### retry
+#md_
+has 'retry' => (
+    is => 'rw', isa => Int, default => sub { 0 }
+);
+
 #md_## Les méthodes
 #md_
 

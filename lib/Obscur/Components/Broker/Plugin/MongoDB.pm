@@ -101,8 +101,8 @@ sub _ack_message {
 #md_### _requeue_message()
 #md_
 sub _requeue_message {
-    my ($self, $collection, $message) = @_;
-    try   { $collection->update_one({_id => $message->id}, {'$set' => {reserved => 0, timestamp => time + 30}}) }
+    my ($self, $collection, $message, $after) = @_;
+    try   { $collection->update_one({_id => $message->id}, {'$set' => {reserved => 0, timestamp => time + $after}}) }
     catch { $self->logger->error("$_") };
 }
 
@@ -131,11 +131,13 @@ sub _get_message {
                             if $self->debug;
                         try {
                             $self->runner->$cb_name($message->type, $message);
-                            $self->_ack_message($collection, $message);
+                            $message->retry
+                                ? $self->_requeue_message($collection, $message, $message->retry)
+                                : $self->_ack_message(    $collection, $message);
                         }
                         catch {
                             $self->logger->error("$_");
-                            $self->_requeue_message($collection, $message);
+                            $self->_requeue_message($collection, $message, 30);
                         };
                     }
                     catch {
