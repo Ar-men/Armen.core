@@ -17,6 +17,7 @@ requires 'DBI';
 requires 'Email::Sender';
 requires 'EV';
 requires 'Guard';
+requires 'HTML::Entities';
 requires 'HTTP::Parser::XS';
 requires 'HTTP::Tiny';                          # v5.13.9
 requires 'IO::Pty';

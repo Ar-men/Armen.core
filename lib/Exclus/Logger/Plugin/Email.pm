@@ -11,6 +11,7 @@ package Exclus::Logger::Plugin::Email;
 #md_
 
 use Exclus::Exclus;
+use HTML::Entities qw(encode_entities);
 use List::Util qw(pairmap);
 use Moo;
 use Exclus::Email;
@@ -35,6 +36,7 @@ has '+level' => (
 #md_
 sub log {
     my ($self, $logger, $level, $message, $attributes) = @_;
+    encode_entities($message);
     my $severity = $level eq 'err' ? 'error' : $level eq 'crit' ? 'critical' : $level;
 ###::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::###
     Exclus::Email
