@@ -106,10 +106,41 @@ sub _requeue_message {
     catch { $self->logger->error("$_") };
 }
 
-#md_### _get_message()
+#md_### _handle_message()
 #md_
-sub _get_message {
-    my ($self, $after, $collection, $cb_name) = @_;
+sub _handle_message {
+    my ($self, $collection, $cb_name, $message) = @_;
+    try {
+        $self->runner->$cb_name($message->type, $message);
+        $message->retry
+            ? $self->_requeue_message($collection, $message, $message->retry)
+            : $self->_ack_message(    $collection, $message);
+    }
+    catch {
+        $self->logger->error("$_");
+        $self->_requeue_message($collection, $message, 30);
+    };
+}
+
+#md_### _handle_document()
+#md_
+sub _handle_document {
+    my ($self, $collection, $cb_name, $document) = @_;
+    try {
+        my $message = Exclus::Message->from_mongodb($document);
+        $self->logger->debug('Consume', ['@id' => $message->id, type => $message->type])
+            if $self->debug;
+        $self->_handle_message($collection, $cb_name, $message);
+    }
+    catch {
+        $self->logger->error("$_");
+    };
+}
+
+#md_### _consume_forever()
+#md_
+sub _consume_forever {
+    my ($self, $retries, $after, $collection, $cb_name) = @_;
     return
         if $self->runner->is_stopping;
     my $w;
@@ -119,41 +150,31 @@ sub _get_message {
         sub {
             undef $w;
             try {
-                my $doc = $collection->find_one_and_update(
+                my $document = $collection->find_one_and_update(
                     {reserved => 0, timestamp => {'$lt' => time}},
                     {'$set' => {reserved => 1, timestamp => time}},
                     {sort => {priority => -1, timestamp => 1}}
                 );
-                if ($doc) {
-                    try {
-                        my $message = Exclus::Message->from_mongodb($doc);
-                        $self->logger->debug('Consume', ['@id' => $message->id, type => $message->type])
-                            if $self->debug;
-                        try {
-                            $self->runner->$cb_name($message->type, $message);
-                            $message->retry
-                                ? $self->_requeue_message($collection, $message, $message->retry)
-                                : $self->_ack_message(    $collection, $message);
-                        }
-                        catch {
-                            $self->logger->error("$_");
-                            $self->_requeue_message($collection, $message, 30);
-                        };
-                    }
-                    catch {
-                        $self->logger->error("$_");
-                    };
-                    $after = 0.1;
+                $retries = 0;
+                if ($document) {
+                    $self->_handle_document($collection, $cb_name, $document);
+                    $after = 0;
                 }
                 else {
                     $after = 1;
                 }
             }
             catch {
-                $self->logger->error("$_");
-                $after = 10;
+                $after = ++$retries * 30;
+                $self->logger->warning(
+                    "Impossible de consommer les messages du 'broker'",
+                    [
+                        reason => "$_",
+                        pause  => "$after s"
+                    ]
+                );
             };
-            $self->_get_message($after, $collection, $cb_name);
+            $self->_consume_forever($retries, $after, $collection, $cb_name);
         }
     );
 }
@@ -163,7 +184,7 @@ sub _get_message {
 sub consume {
     my ($self, $queue, $cb_name) = @_;
     if (my $collection = $self->_bindings->{$queue}->{collection}) {
-        $self->_get_message(1, $collection, $cb_name // 'on_message');
+        $self->_consume_forever(0, 1, $collection, $cb_name // 'on_message');
     }
     else {
         EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////////
