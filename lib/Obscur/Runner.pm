@@ -117,7 +117,7 @@ sub get_short_id { substr($_[0]->id, 0, 8) }
 #md_
 sub signature {
     my ($self) = @_;
-    return $self->name . '[' . $self->id . ']';
+    return sprintf('%s[%s]', $self->name, $self->id);
 }
 
 #md_### properties()
