@@ -32,7 +32,7 @@ our @EXPORT_OK = qw(
     trim_left  trim_right clean_string create_uuid time_to_string to_stderr maybe_undef  dump_data
     monkey_patch key_value plugin  deep_exists ms_sleep t0  t0_ms_elapsed to_priority format_table
     render_table generate_string build_path root_path get_basename replace_extension get_file_name
-    get_version template replace
+    get_version template replace exponential_backoff
 );
 
 #md_## Les méthodes
@@ -258,6 +258,14 @@ sub replace {
         $i++;
     }
     return $expression;
+}
+
+#md_### exponential_backoff()
+#md_
+sub exponential_backoff {
+    my ($retries, $factor, $max) = @_;
+    my $value = 2**$retries * $factor;
+    return defined $max ? min($value, $max) : $value;
 }
 
 1;
