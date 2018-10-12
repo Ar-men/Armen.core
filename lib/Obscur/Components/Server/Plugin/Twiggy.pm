@@ -79,7 +79,7 @@ sub _delayed_response {
 sub _psgi_api {
     my ($self, $env) = @_;
     my $runner = $self->runner;
-    my $rr = _RequestResponse->new(runner => $runner, env => $env, debug => $self->debug);
+    my $rr = _OCSPT::RequestResponse->new(runner => $runner, env => $env, debug => $self->debug);
     my $later;
     try {
         my ($cb, $params, $is_method_not_allowed, $allowed_methods) = $self->route_match($env);
@@ -112,9 +112,9 @@ sub put    { shift->_router->add('PUT',    @_) }
 #md_
 sub any { shift->_router->add([qw(DELETE GET POST PUT)], @_) }
 
-package _RequestResponse; ##############################################################################################
+package _OCSPT::RequestResponse; #######################################################################################
 
-#md_# _RequestResponse
+#md_# _OCSPT::RequestResponse
 #md_
 
 use Exclus::Exclus;
