@@ -18,6 +18,7 @@ use Types::Standard -types;
 use Exclus::Data;
 use Exclus::Exceptions;
 use Exclus::Message;
+use Exclus::Util qw(exponential_backoff);
 use namespace::clean;
 
 extends qw(Obscur::Databases::MongoDB);
@@ -41,6 +42,12 @@ has '_bindings' => (
     is => 'lazy', isa => HashRef, init_arg => undef
 );
 
+#md_### _to_publish
+#md_
+has '_to_publish' => (
+    is => 'ro', isa => ArrayRef, default => sub { [] }, init_arg => undef
+);
+
 #md_## Les méthodes
 #md_
 
@@ -60,9 +67,9 @@ sub _build__bindings {
     return $bindings;
 }
 
-#md_### publish()
+#md_### _build_message_document()
 #md_
-sub publish {
+sub _build_message_document {
     my ($self, $type, $priority, $data) = @_;
     my $message = Exclus::Message->new(
         type     => $type,
@@ -70,6 +77,41 @@ sub publish {
         priority => $priority,
         payload  => $data
     );
+    my $document = $message->unbless;
+    $document->{_id} = delete $document->{id};
+    return ($message, $document);
+}
+
+#md_### _try_publish()
+#md_
+sub _try_publish {
+    my ($self, $collection, $document) = @_;
+    my $end;
+    my $fifo = $self->_to_publish;
+    push @$fifo, [$collection, $document];
+    do {
+        ($collection, $document) = @{shift @$fifo};
+        try {
+            $collection->insert_one($document);
+            $self->logger->debug('Published', ['@id' => $document->{_id}])
+                if $self->debug;
+        }
+        catch {
+            unshift @$fifo, [$collection, $document];
+            $self->logger->notice("$_");
+            my $count = @$fifo;
+            $self->logger->warning("Des messages sont en attente de publication par le 'Broker'", [count => $count])
+                unless $count % 10;
+            $end = 1;
+        };
+    } while (@$fifo && !$end);
+}
+
+#md_### publish()
+#md_
+sub publish {
+    my ($self, $type, $priority, $data) = @_;
+    my ($message, $document) = $self->_build_message_document($type, $priority, $data);
     my $bindings = $self->_bindings;
     foreach my $queue (keys %$bindings) {
         my $collection = $bindings->{$queue}->{collection};
@@ -77,33 +119,52 @@ sub publish {
             if ($type =~ m!^$_$!) {
                 $self->logger->debug('Publish', ['@id' => $message->id, queue => $queue, type => $type])
                     if $self->debug;
-                $collection->insert_one($message->to_mongodb);
+                $self->_try_publish($collection, $document);
                 last;
             }
         }
     }
 }
 
-#md_### try_publish()
-#md_
-sub try_publish {
-    my ($self, @args) = @_;
-    try { $self->publish(@args) } catch { $self->logger->error("$_") };
-}
-
 #md_### _ack_message()
 #md_
 sub _ack_message {
     my ($self, $collection, $message) = @_;
-    try { $collection->delete_one({_id => $message->id}) } catch { $self->logger->error("$_") };
+    try {
+        $collection->delete_one({_id => $message->id});
+    }
+    catch {
+        $self->logger->error(
+            "Impossible de supprimer ce message dans le 'Broker'",
+            [
+                reason  => "$_",
+                message => $message->signature,
+                TODO    => 'Supprimer le message dans le backend'
+            ]
+        );
+    };
 }
 
 #md_### _requeue_message()
 #md_
 sub _requeue_message {
     my ($self, $collection, $message, $after) = @_;
-    try   { $collection->update_one({_id => $message->id}, {'$set' => {reserved => 0, timestamp => time + $after}}) }
-    catch { $self->logger->error("$_") };
+    try {
+        $collection->update_one(
+            {_id => $message->id},
+            {'$set' => {reserved => 0, timestamp => time + $after, retries => $message->retries}}
+        );
+    }
+    catch {
+        $self->logger->error(
+            "Impossible de réactiver ce message dans le 'Broker'",
+            [
+                reason  => "$_",
+                message => $message->signature,
+                TODO    => 'Réactiver le message dans le backend'
+            ]
+        );
+    };
 }
 
 #md_### _handle_message()
@@ -111,14 +172,26 @@ sub _requeue_message {
 sub _handle_message {
     my ($self, $collection, $cb_name, $message) = @_;
     try {
+        $self->logger->debug('Consume', ['@id' => $message->id, type => $message->type])
+            if $self->debug;
+        $message->clear_after;
         $self->runner->$cb_name($message->type, $message);
-        $message->retry
-            ? $self->_requeue_message($collection, $message, $message->retry)
+        $message->retry_after
+            ? $self->_requeue_message($collection, $message, $message->retry_after)
             : $self->_ack_message(    $collection, $message);
     }
     catch {
-        $self->logger->error("$_");
-        $self->_requeue_message($collection, $message, 30);
+        my $after = exponential_backoff(my $retries = $message->retry, 30, 3840);
+        $self->logger->warning(
+            "Echec lors du traitement d'un message du 'Broker'",
+            [
+                reason      => "$_",
+                message     => $message->signature,
+                retry_after => "$after s",
+                retries     => $retries
+            ]
+        );
+        $self->_requeue_message($collection, $message, $after);
     };
 }
 
@@ -127,13 +200,18 @@ sub _handle_message {
 sub _handle_document {
     my ($self, $collection, $cb_name, $document) = @_;
     try {
-        my $message = Exclus::Message->from_mongodb($document);
-        $self->logger->debug('Consume', ['@id' => $message->id, type => $message->type])
-            if $self->debug;
-        $self->_handle_message($collection, $cb_name, $message);
+        $document->{id} = delete $document->{_id};
+        $self->_handle_message($collection, $cb_name, Exclus::Message->new($document));
     }
     catch {
-        $self->logger->error("$_");
+        $self->logger->error(
+            "Ce message du 'Broker' n'est pas valide",
+            [
+                reason  => "$_",
+                message => $document,
+                TODO    => 'Corriger le message dans le backend'
+            ]
+        );
     };
 }
 
@@ -165,14 +243,16 @@ sub _consume_forever {
                 }
             }
             catch {
-                $after = ++$retries * 30;
+                $after = exponential_backoff($retries, 30, 3840);
                 $self->logger->warning(
-                    "Impossible de consommer les messages du 'broker'",
+                    "Impossible de consommer les messages du 'Broker'",
                     [
-                        reason => "$_",
-                        pause  => "$after s"
+                        reason      => "$_",
+                        retry_after => "$after s",
+                        retries     => $retries
                     ]
                 );
+                $retries++;
             };
             $self->_consume_forever($retries, $after, $collection, $cb_name);
         }

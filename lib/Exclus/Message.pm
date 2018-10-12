@@ -11,7 +11,6 @@ package Exclus::Message;
 #md_
 
 use Exclus::Exclus;
-use JSON::MaybeXS;
 use Moo;
 use Types::Standard -types;
 use Exclus::Util qw(create_uuid to_priority);
@@ -62,33 +61,31 @@ has 'reserved' => (
     is => 'ro', isa => Bool, default => sub { 0 }
 );
 
-#md_### retry
+#md_### retries
 #md_
-has 'retry' => (
+has 'retries' => (
     is => 'rw', isa => Int, default => sub { 0 }
+);
+
+#md_### _after
+#md_
+has '_after' => (
+    is => 'rw', isa => Int, clearer => 'clear_after', default => sub { 0 }
 );
 
 #md_## Les méthodes
 #md_
 
-#md_### from_json()
+#md_### signature()
 #md_
-sub from_json {
-    my ($class, $data) = @_;
-    return $class->new(%{JSON::MaybeXS->new(utf8 => 1)->decode($data)});
+sub signature {
+    my ($self) = @_;
+    return sprintf('%s[%s]', $self->type, $self->id);
 }
 
-#md_### from_mongodb()
+#md_### unbless()
 #md_
-sub from_mongodb {
-    my ($class, $data) = @_;
-    $data->{id} = delete $data->{_id};
-    return $class->new(%$data);
-}
-
-#md_### _render()
-#md_
-sub _render {
+sub unbless {
     my ($self) = @_;
     return {
         id        => $self->id,
@@ -97,21 +94,29 @@ sub _render {
         sender    => $self->sender,
         payload   => $self->payload,
         type      => $self->type,
-        reserved  => $self->reserved
+        reserved  => $self->reserved,
+        retries   => $self->retries
     };
 }
 
-#md_### to_json()
+#md_### retry()
 #md_
-sub to_json { JSON::MaybeXS->new(utf8 => 1)->encode($_[0]->_render) }
-
-#md_### to_mongodb()
-#md_
-sub to_mongodb {
+sub retry {
     my ($self) = @_;
-    my $message = $self->_render;
-    $message->{_id} = delete $message->{id};
-    return $message;
+    my $retries = $self->retries;
+    $self->retries($retries +1);
+    return $retries;
+}
+
+#md_### retry_after()
+#md_
+sub retry_after {
+    my $self = shift;
+    if (@_) {
+        $self->_after($_[0]);
+        $self->retry;
+    }
+    return $self->_after;
 }
 
 1;
