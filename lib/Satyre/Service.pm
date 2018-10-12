@@ -80,7 +80,7 @@ sub _check_services {
     my $heartbeat = $self->config->get_int('heartbeat');
     foreach ($self->discovery->get_services) {
         next if $_->{id} eq $self->id;
-        my $params = [id => $_->{id}, µs => $_->{name}, dc => $_->{dc}, node => $_->{node}];
+        my $params = [id => $_->{id}, name => $_->{name}, dc => $_->{dc}, node => $_->{node}];
         if ($_->{status} eq 'running') {
             my $elapsed = time - $_->{heartbeat};
             push @$params, elapsed => $elapsed;
