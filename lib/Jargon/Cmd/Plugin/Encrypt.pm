@@ -24,7 +24,7 @@ extends qw(Jargon::Cmd::Plugin);
 #md_
 sub run {
     my ($self, $string) = @_;
-    printf("$string ---> %s\n", encrypt($string));
+    printf("%s ---> %s\n", $string, encrypt($string));
 }
 
 1;
