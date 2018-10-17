@@ -21,39 +21,45 @@ use namespace::clean;
 #md_## Les attributs
 #md_
 
-#md_### timeout
-#md_
-has 'timeout' => (
-    is => 'ro', isa => Int, default => sub { 5 }
-);
-
 #md_### _client
 #md_
 has '_client' => (
-    is => 'lazy', isa => InstanceOf['HTTP::Tiny'], init_arg => undef
+    is => 'ro', isa => InstanceOf['HTTP::Tiny'], required => 1
 );
 
 #md_### _options
 #md_
 has '_options' => (
-    is => 'ro', isa => HashRef, default => sub { {headers => {}} }, init_arg => undef
+    is => 'ro',
+    isa => HashRef,
+    default => sub { {headers => {'Accept-Charset' => 'UTF-8', 'Accept' => 'application/json'}} },
+    init_arg => undef
 );
 
 #md_## Les méthodes
 #md_
 
-#md_### _build__client()
+#md_### BUILDARGS()
 #md_
-sub _build__client {
-    my $self = shift;
-    return HTTP::Tiny->new(
-        agent           => 'armen/armen.core/Exclus',
-        default_headers => {'Accept-Charset' => 'UTF-8', 'Accept' => 'application/json'},
-        http_proxy      => undef,
-        https_proxy     => undef,
-        proxy           => undef,
-        timeout         => $self->timeout
+around BUILDARGS => sub {
+    my ($orig, $class, %args) = @_;
+    return $class->$orig(
+        _client => HTTP::Tiny->new(
+            agent       => 'armen/armen.core/Exclus',
+            http_proxy  => undef,
+            https_proxy => undef,
+            proxy       => undef,
+            timeout     => 5,
+            %args
+        )
     );
+};
+
+#md_### add_header()
+#md_
+sub add_header {
+    my ($self, $name, $value) = @_;
+    $self->_options->{headers}->{$name} = $value;
 }
 
 #md_### send_json()
