@@ -48,7 +48,7 @@ sub parse {
         my $cfg = key_value($config, 'cfg', {});
         if (!defined $use || is_ref($use) || looks_like_number($use) || !is_hashref($cfg)) {
             EX->throw({ ##//////////////////////////////////////////////////////////////////////////////////////////////
-                message => "Cette élément de configuration n'est pas valide",
+                message => "Cet élément de configuration n'est pas valide",
                 params  => [config => $_[0]]
             });
         }
