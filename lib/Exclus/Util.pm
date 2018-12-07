@@ -32,7 +32,7 @@ our @EXPORT_OK = qw(
     trim_left  trim_right clean_string create_uuid time_to_string to_stderr maybe_undef  dump_data
     monkey_patch key_value plugin  deep_exists ms_sleep t0  t0_ms_elapsed to_priority format_table
     render_table generate_string build_path root_path get_basename replace_extension get_file_name
-    get_version template replace exponential_backoff
+    get_version template replace exponential_backoff get_extension
 );
 
 #md_## Les méthodes
@@ -231,6 +231,14 @@ sub get_file_name {
     my ($path_file) = @_;
     my ($file_name) = $path_file =~ m!([^\/]+)$!;
     return $file_name;
+}
+
+#md_### get_extension()
+#md_
+sub get_extension {
+    my ($file_name) = @_;
+    my ($extension) = $file_name =~ m!\.([^.]+)$!;
+    return $extension;
 }
 
 #md_### get_version()
