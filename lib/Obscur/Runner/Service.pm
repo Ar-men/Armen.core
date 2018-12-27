@@ -70,6 +70,12 @@ has '_API_cmds' => (
     is => 'lazy', isa => HashRef, init_arg => undef
 );
 
+#md_### automatic_shutdown
+#md_
+has 'automatic_shutdown' => (
+    is => 'ro', isa => Bool, default => sub { 0 }, init_arg => undef
+);
+
 #md_## Les méthodes
 #md_
 
@@ -276,6 +282,14 @@ sub _stop {
     $self->scheduler->add_timer(5, 2, sub { $self->_stop_loop if $self->is_ready_to_stop });
 }
 
+#md_### _shutdown()
+#md_
+sub _shutdown {
+    my ($self) = @_;
+    $self->info('Shutdown...');
+    $self->_stop;
+}
+
 #md_### _start_loop()
 #md_
 sub _start_loop {
@@ -284,6 +298,10 @@ sub _start_loop {
         AE::signal('QUIT', sub { $self->_stop_loop }),
         AE::signal('TERM', sub { $self->_stop      })
     );
+    if ($self->automatic_shutdown) {
+        $self->notice('Automatic shutdown');
+        AE::timer(3600 * 12 + int(rand(3600)), 0, sub { $self->_shutdown });
+    }
     $self->_cv_stop->recv;
 }
 
