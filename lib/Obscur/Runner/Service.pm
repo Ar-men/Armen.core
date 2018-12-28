@@ -300,7 +300,7 @@ sub _start_loop {
     );
     if ($self->automatic_shutdown) {
         $self->notice('Automatic shutdown');
-        AE::timer(3600 * 12 + int(rand(3600)), 0, sub { $self->_shutdown });
+        push @watchers, AE::timer(3600 * 8 + int(rand(3600)), 0, sub { $self->_shutdown });
     }
     $self->_cv_stop->recv;
 }
